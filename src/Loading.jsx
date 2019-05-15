@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import icon from "../public/favicon.ico";
 
 const SPEED = 500;
+const DELAY = 1500;
 
 const Loading = ({ classes, test, children }) => {
   const [rat, setRat] = useState(null);
@@ -33,6 +34,11 @@ const Loading = ({ classes, test, children }) => {
 export default withStyles(theme => {
   return {
     container: {
+      display: "flex",
+      height: "90vh",
+      width: "100%",
+      justifyContent: "center",
+      alignItems: "center",
       transition: `ease-out all ${SPEED}ms`
     },
     img: {
@@ -66,10 +72,11 @@ function useDelayLoading(test) {
 
   useEffect(() => {
     const tf = +new Date();
+
     if (test) {
-      if (tf - ti > 1500) setLoaded(true);
+      if (tf - ti.current > DELAY) setLoaded(true);
       else {
-        const res = 1500 - (tf - ti);
+        const res = DELAY - (tf - ti.current);
         setTimeout(() => setLoaded(true), res);
       }
     }
