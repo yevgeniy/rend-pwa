@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import icon from "../public/favicon.ico";
+import icon from "./loader.ico";
 
 const SPEED = 500;
 const DELAY = 1500;
