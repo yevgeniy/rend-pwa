@@ -24,7 +24,7 @@ const ImgList = ({ classes, state, db, states, setNav }) => {
         {(imgs || []).map(img => {
           return (
             <div className={classes.imgContainer}>
-              <img key={img.thumb} src={img.thumb} alt="" />;
+              <img key={img.thumb} src={img.thumb} alt="" />
             </div>
           );
         })}
@@ -40,7 +40,7 @@ export default withStyles(theme => {
       verticalAlign: "top"
     },
     menuButton: {
-      position: "absolute",
+      position: "fixed",
       top: 8,
       left: 8,
       background: theme.palette.secondary.dark,
