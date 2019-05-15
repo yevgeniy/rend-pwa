@@ -57,9 +57,8 @@ function useImages(db, state) {
   const [images, setImages] = useState(null);
 
   useEffect(() => {
-    let images;
 
-    if (state == "__MARKED__") {
+    if (state === "__MARKED__") {
       getMarkedImages(db)
         .then(res => setImages(res))
         .catch(err => {

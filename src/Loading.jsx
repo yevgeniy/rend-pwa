@@ -11,8 +11,8 @@ const Loading = ({ classes, test, children }) => {
   const loaded = useDelayLoading(test);
   const [opacity, showContent] = useShowContent(loaded);
   useEffect(() => {
-    if (rat == 1) setTimeout(() => setRat(0.9), SPEED);
-    else if (rat == 0.9) setTimeout(() => setRat(1), SPEED);
+    if (rat === 1) setTimeout(() => setRat(0.9), SPEED);
+    else if (rat === 0.9) setTimeout(() => setRat(1), SPEED);
     else setRat(0.9);
   }, [rat]);
 

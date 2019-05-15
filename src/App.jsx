@@ -7,13 +7,14 @@ import {
 import { withStyles } from "@material-ui/core/styles";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
+
 import "./styles.css";
 
 const App = ({ classes }) => {
   const [db, setDb] = useState(null);
   const [states, setStates] = useState(null);
   const [nav, setNav] = useState(null);
-
+  
   useEffect(() => {
     var client = Stitch.initializeDefaultAppClient("rend-app-nczgz");
     const mongodb = client.getServiceClient(
