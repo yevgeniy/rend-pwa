@@ -116,8 +116,8 @@ export default withStyles(theme => {
     },
     menuButton: {
       position: "fixed",
-      top: 8,
-      left: 8,
+      top: 5,
+      left: 5,
       background: theme.palette.secondary.dark,
       opacity: 0.8,
       color: theme.palette.secondary.contrastText,

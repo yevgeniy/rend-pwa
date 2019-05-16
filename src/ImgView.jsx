@@ -16,37 +16,48 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
   };
 
   useEffect(() => {
+    let instance;
     const loaded = () => {
-      const instance = panzoom(document.querySelector("#panthis"), {
-        minZoom: 1
+      instance = panzoom(document.querySelector("#panthis"), {
+        minZoom: 1,
+        smoothScroll: false
       });
-
       const origWidth = imgRef.current.getBoundingClientRect().width;
-      instance.on("zoom", function(e) {
+      const work = e => {
         setTimeout(() => {
-          setZoom(imgRef.current.getBoundingClientRect().width / origWidth);
+          const z = imgRef.current.getBoundingClientRect().width / origWidth;
+          console.log(e);
+          setZoom(z);
+          if (z === 1) e.moveTo(0, 0);
         }, 100);
-      });
+      };
+      instance.on("zoom", work);
+      instance.on("panend", work);
     };
     imgRef.current.addEventListener("load", loaded);
     return () => {
       imgRef.current.removeEventListener("load", loaded);
+      instance && instance.dispose();
     };
   }, []);
 
-  const opacity = zoom == 1 ? 1 : 0;
+  const opacity = zoom === 1 ? 1 : 0;
+  const pointerEvents = zoom === 1 ? "" : "none";
 
   return (
     <div className={classes.container}>
       <div id="panthis" className={classes.imgContainer}>
         <img ref={imgRef} className={classes.img} src={img.reg} alt="" />
       </div>
-      <IconButton className={classes.menuButton} style={{ opacity }}>
+      <IconButton
+        className={classes.menuButton}
+        style={{ opacity, pointerEvents }}
+      >
         <MenuIcon />
       </IconButton>
       <IconButton
         className={classes.backButton}
-        style={{ opacity }}
+        style={{ opacity, pointerEvents }}
         onClick={back}
       >
         <BackIcon />
@@ -81,7 +92,7 @@ export default withStyles(theme => {
       margin: "auto"
     },
     backButton: {
-      position: "absolute",
+      position: "fixed",
       left: 5,
       top: 5,
       background: theme.palette.secondary.dark,
@@ -93,7 +104,7 @@ export default withStyles(theme => {
       }
     },
     menuButton: {
-      position: "absolute",
+      position: "fixed",
       right: 5,
       top: 5,
       background: theme.palette.primary.dark,
