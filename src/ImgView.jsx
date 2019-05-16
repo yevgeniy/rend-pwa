@@ -42,7 +42,7 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
   }, []);
 
   const opacity = zoom === 1 ? 1 : 0;
-  const pointerEvents = zoom === 1 ? "" : "none";
+  const pointerEvents = zoom === 1 ? "all" : "none";
 
   return (
     <div className={classes.container}>
