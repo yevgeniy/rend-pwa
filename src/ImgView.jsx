@@ -58,7 +58,8 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
       <IconButton
         className={classes.backButton}
         style={{ opacity, pointerEvents }}
-        onClick={back}
+        onMouseDown={back}
+        onTouchStart={back}
       >
         <BackIcon />
       </IconButton>
