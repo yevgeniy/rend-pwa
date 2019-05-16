@@ -8,12 +8,17 @@ import Create from "@material-ui/icons/Create";
 import Drawer from "@material-ui/core/Drawer";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
+import ImgView from "./ImgView";
 
-const ImgList = ({ classes, state, db, states, setNav }) => {
-  const imgs = useImages(db, state);
+const ImgList = ({ classes, state, db, states, setNav, imgs: propImgs }) => {
+  const imgs = useImages(db, state, propImgs);
+  const [selectedImage, setSelectedImage] = useState(null);
   const [open, setOpen] = useState(false);
   const openDrawer = () => {
     setOpen(true);
+  };
+  const selectImg = img => {
+    setSelectedImage(img);
   };
   const renderIconsContainer = img => {
     if (img.marked || img.drawing || img.drawn) {
@@ -54,11 +59,20 @@ const ImgList = ({ classes, state, db, states, setNav }) => {
         <MenuIcon />
       </IconButton>
       <Loading test={!!imgs}>
-        <div className={classes.imgsContainer}>
+        <div
+          className={classes.imgsContainer}
+          style={{
+            overflow: selectedImage ? "hidden" : "",
+            pointerEvents: selectedImage ? "none" : ""
+          }}
+        >
           {(imgs || []).map(img => {
-            console.log(img);
             return (
-              <div key={img.id} className={classes.imgContainer}>
+              <div
+                key={img.id}
+                className={classes.imgContainer}
+                onClick={() => selectImg(img)}
+              >
                 {renderIconsContainer(img)}
                 <img key={img.thumb} src={img.thumb} alt="" />
               </div>
@@ -66,6 +80,9 @@ const ImgList = ({ classes, state, db, states, setNav }) => {
           })}
         </div>
       </Loading>
+      {selectedImage ? (
+        <ImgView {...{ img: selectedImage, db, setSelectedImage }} />
+      ) : null}
     </div>
   );
 };
@@ -111,10 +128,11 @@ export default withStyles(theme => {
   };
 })(ImgList);
 
-function useImages(db, state) {
-  const [images, setImages] = useState(null);
+function useImages(db, state, propImgs) {
+  const [images, setImages] = useState(propImgs);
 
   useEffect(() => {
+    if (images) return;
     if (state === "__MARKED__") {
       getMarkedImages(db)
         .then(res => setImages(res))
@@ -127,7 +145,7 @@ function useImages(db, state) {
         .catch(err => {
           throw err;
         });
-  }, [db, state]);
+  }, [db, state, images]);
 
   return images;
 }

@@ -7,6 +7,7 @@ const DELAY = 1500;
 
 const Loading = ({ classes, test, children }) => {
   const [rat, setRat] = useState(null);
+  const notloadedFirstTest = useRef(null);
 
   const loaded = useDelayLoading(test);
   const [opacity, showContent] = useShowContent(loaded);
@@ -20,7 +21,9 @@ const Loading = ({ classes, test, children }) => {
   containerStyle.transform = `scale(${rat})`;
   containerStyle.opacity = opacity;
 
-  if (showContent) return children;
+  if ((notloadedFirstTest.current == null && test) || showContent)
+    return children;
+  notloadedFirstTest.current = false;
 
   return (
     <>
