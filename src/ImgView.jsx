@@ -19,6 +19,10 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
     let instance;
     const loaded = () => {
       instance = panzoom(document.querySelector("#panthis"), {
+        onTouch: function(e) {
+          // `e` - is current touch event.
+          return false; // tells the library to not preventDefault.
+        },
         minZoom: 1,
         smoothScroll: false
       });
@@ -58,8 +62,7 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
       <IconButton
         className={classes.backButton}
         style={{ opacity, pointerEvents }}
-        onMouseDown={back}
-        onTouchStart={back}
+        onClick={back}
       >
         <BackIcon />
       </IconButton>
