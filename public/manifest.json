@@ -8,11 +8,17 @@
       "type": "image/x-icon"
     },
     {
-      "src": "manifest.png",
+      "src": "icon-192x192.png",
+      "sizes": "192x192px",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
       "sizes": "192x192px 512x512px",
       "type": "image/png"
     }
   ],
+  "prefer_related_applications": false,
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
