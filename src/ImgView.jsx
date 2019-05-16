@@ -93,6 +93,7 @@ export default withStyles(theme => {
     },
     backButton: {
       position: "fixed",
+      zIndex: 9999999,
       left: 5,
       top: 5,
       background: theme.palette.secondary.dark,
@@ -105,6 +106,7 @@ export default withStyles(theme => {
     },
     menuButton: {
       position: "fixed",
+      zIndex: 9999999,
       right: 5,
       top: 5,
       background: theme.palette.primary.dark,
