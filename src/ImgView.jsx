@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
 import AppBar from "@material-ui/core/AppBar";
@@ -9,23 +9,46 @@ import BackIcon from "@material-ui/icons/Reply";
 import panzoom from "panzoom";
 
 const ImgView = ({ classes, img, db, setSelectedImage }) => {
+  const imgRef = useRef();
+  const [zoom, setZoom] = useState(1);
   const back = () => {
     setSelectedImage(null);
   };
 
   useEffect(() => {
-    panzoom(document.querySelector("#panthis"));
+    const loaded = () => {
+      const instance = panzoom(document.querySelector("#panthis"), {
+        minZoom: 1
+      });
+
+      const origWidth = imgRef.current.getBoundingClientRect().width;
+      instance.on("zoom", function(e) {
+        setTimeout(() => {
+          setZoom(imgRef.current.getBoundingClientRect().width / origWidth);
+        }, 100);
+      });
+    };
+    imgRef.current.addEventListener("load", loaded);
+    return () => {
+      imgRef.current.removeEventListener("load", loaded);
+    };
   }, []);
+
+  const opacity = zoom == 1 ? 1 : 0;
 
   return (
     <div className={classes.container}>
       <div id="panthis" className={classes.imgContainer}>
-        <img className={classes.img} src={img.reg} alt="" />
+        <img ref={imgRef} className={classes.img} src={img.reg} alt="" />
       </div>
-      <IconButton className={classes.menuButton}>
+      <IconButton className={classes.menuButton} style={{ opacity }}>
         <MenuIcon />
       </IconButton>
-      <IconButton className={classes.backButton} onClick={back}>
+      <IconButton
+        className={classes.backButton}
+        style={{ opacity }}
+        onClick={back}
+      >
         <BackIcon />
       </IconButton>
     </div>
@@ -64,6 +87,7 @@ export default withStyles(theme => {
       background: theme.palette.secondary.dark,
       opacity: 0.8,
       color: theme.palette.secondary.contrastText,
+      transition: "ease all 300ms",
       "&:hover": {
         background: theme.palette.secondary.light
       }
@@ -75,6 +99,7 @@ export default withStyles(theme => {
       background: theme.palette.primary.dark,
       opacity: 0.8,
       color: theme.palette.primary.contrastText,
+      transition: "ease all 300ms",
       "&:hover": {
         background: theme.palette.primary.light
       }
