@@ -15,24 +15,6 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
     setSelectedImage(null);
   };
 
-  const [logTest, setLogtest] = useState(null);
-  const log = () => {
-    return (
-      <div
-        style={{
-          top: "20%",
-          position: "fixed",
-          left: "5px",
-          background: "black",
-          color: "white",
-          zIndex: 9999999999
-        }}
-      >
-        {logTest}
-      </div>
-    );
-  };
-
   useEffect(() => {
     let instance;
     const loaded = () => {
@@ -41,8 +23,7 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
           var i = e.path.some(
             v => v.id === "menuButton" || v.id === "backButton"
           );
-          setLogtest(i.toString());
-          console.log(i);
+
           if (i) return false;
           // `e` - is current touch event.
           //if (1.05 > zoom && zoom >= 1) return false; // tells the library to not preventDefault.
@@ -92,7 +73,6 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
       >
         <BackIcon />
       </IconButton>
-      {log()}
     </div>
   );
 };
