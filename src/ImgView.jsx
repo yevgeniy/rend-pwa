@@ -20,8 +20,11 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
     const loaded = () => {
       instance = panzoom(document.querySelector("#panthis"), {
         onTouch: function(e) {
+          if (e.path.some(v => v.id === "menuButton" || v.id === "backButton"))
+            return false;
           // `e` - is current touch event.
-          return false; // tells the library to not preventDefault.
+          //if (1.05 > zoom && zoom >= 1) return false; // tells the library to not preventDefault.
+          return true;
         },
         minZoom: 1,
         smoothScroll: false
@@ -30,9 +33,8 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
       const work = e => {
         setTimeout(() => {
           const z = imgRef.current.getBoundingClientRect().width / origWidth;
-          console.log(e);
           setZoom(z);
-          if (z === 1) e.moveTo(0, 0);
+          if (1.05 > z && z >= 1) e.moveTo(0, 0);
         }, 100);
       };
       instance.on("zoom", work);
@@ -54,12 +56,14 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
         <img ref={imgRef} className={classes.img} src={img.reg} alt="" />
       </div>
       <IconButton
+        id="menuButton"
         className={classes.menuButton}
         style={{ opacity, pointerEvents }}
       >
         <MenuIcon />
       </IconButton>
       <IconButton
+        id="backButton"
         className={classes.backButton}
         style={{ opacity, pointerEvents }}
         onClick={back}
@@ -93,7 +97,8 @@ export default withStyles(theme => {
       left: 0,
       right: 0,
       bottom: 0,
-      margin: "auto"
+      margin: "auto",
+      transition: "ease all 300ms"
     },
     backButton: {
       position: "fixed",
