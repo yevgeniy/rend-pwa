@@ -66,7 +66,7 @@ const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
     const loaded = () => {
       instance = panzoom(document.querySelector("#panthis"), {
         onTouch: function(e) {
-          return true;
+          return false;
           // `e` - is current touch event.
           if (1.05 > zoom && zoom >= 1) return false; // tells the library to not preventDefault.
           return true;
