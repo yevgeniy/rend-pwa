@@ -11,7 +11,7 @@ import StatesView from "./StatesView";
 import ImgView from "./ImgView";
 
 const ImgList = ({ classes, state, db, states, setNav, imgs: propImgs }) => {
-  const imgs = useImages(db, state, propImgs);
+  const [imgs, updateImage] = useImages(db, state, propImgs);
   const [selectedImage, setSelectedImage] = useState(null);
   const [open, setOpen] = useState(false);
   const openDrawer = () => {
@@ -37,7 +37,7 @@ const ImgList = ({ classes, state, db, states, setNav, imgs: propImgs }) => {
               )}
             />
           ) : null}
-          {img.done ? (
+          {img.drawn ? (
             <Create
               className={classnames(
                 classes.icon,
@@ -82,7 +82,7 @@ const ImgList = ({ classes, state, db, states, setNav, imgs: propImgs }) => {
         </div>
       </Loading>
       {selectedImage ? (
-        <ImgView {...{ img: selectedImage, db, setSelectedImage }} />
+        <ImgView {...{ img: selectedImage, updateImage, setSelectedImage }} />
       ) : null}
     </div>
   );
@@ -148,7 +148,14 @@ function useImages(db, state, propImgs) {
         });
   }, [db, state, images]);
 
-  return images;
+  const updateImage = async (id, props) => {
+    await db.collection("images").updateOne({ id: id }, { $set: props });
+    var i = images.findIndex(v => v.id === id);
+    images[i] = { ...images[i], ...props };
+    setImages([...images]);
+  };
+
+  return [images, updateImage];
 }
 async function getStateImages(db, state) {
   let images = await db

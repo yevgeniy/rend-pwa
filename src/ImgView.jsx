@@ -1,16 +1,51 @@
 import React, { useEffect, useRef, useState } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import classnames from "classnames";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
+import Drawer from "@material-ui/core/Drawer";
 import IconButton from "@material-ui/core/IconButton";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import ListItemIcon from "@material-ui/core/ListItemIcon";
+import Done from "@material-ui/icons/Done";
+import Create from "@material-ui/icons/Create";
+import Flag from "@material-ui/icons/Flag";
 import MenuIcon from "@material-ui/icons/Menu";
 import BackIcon from "@material-ui/icons/Reply";
 import panzoom from "panzoom";
 
-const ImgView = ({ classes, img, db, setSelectedImage }) => {
+function useMarked(img, updateImage) {
+  const [marked, setMarked] = useState(img.marked);
+
+  useEffect(() => {
+    updateImage(img.id, { marked });
+  }, [marked]);
+
+  return [marked, setMarked];
+}
+function useDrawn(img, updateImage) {
+  const [drawn, setDrawn] = useState(img.drawn);
+
+  useEffect(() => {
+    updateImage(img.id, { drawn });
+  }, [drawn]);
+  return [drawn, setDrawn];
+}
+function useDrawing(img, updateImage) {
+  const [drawing, setDrawing] = useState(img.drawing);
+
+  useEffect(() => {
+    updateImage(img.id, { drawing });
+  }, [drawing]);
+  return [drawing, setDrawing];
+}
+
+const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
   const imgRef = useRef();
   const [zoom, setZoom] = useState(1);
+  const [open, setOpen] = useState(false);
+  const [marked, setMarked] = useMarked(img, updateImage);
+  const [drawn, setDrawn] = useDrawn(img, updateImage);
+  const [drawing, setDrawing] = useDrawing(img, updateImage);
   const back = () => {
     setSelectedImage(null);
   };
@@ -58,6 +93,7 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
         id="menuButton"
         className={classes.menuButton}
         style={{ opacity, pointerEvents }}
+        onClick={() => setOpen(true)}
       >
         <MenuIcon />
       </IconButton>
@@ -69,6 +105,28 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
       >
         <BackIcon />
       </IconButton>
+      <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+        <List component="nav">
+          <ListItem button onClick={() => setMarked(!marked)}>
+            <ListItemIcon>
+              <Done style={{ color: marked ? "green" : "" }} />
+            </ListItemIcon>
+            <ListItemText primary="Mark" />
+          </ListItem>
+          <ListItem button onClick={() => setDrawn(!drawn)}>
+            <ListItemIcon>
+              <Create style={{ color: drawn ? "orange" : "" }} />
+            </ListItemIcon>
+            <ListItemText primary="Drawn" />
+          </ListItem>
+          <ListItem button onClick={() => setDrawing(!drawing)}>
+            <ListItemIcon>
+              <Flag style={{ color: drawing ? "blue" : "" }} />
+            </ListItemIcon>
+            <ListItemText primary="Drawing" />
+          </ListItem>
+        </List>
+      </Drawer>
     </div>
   );
 };
