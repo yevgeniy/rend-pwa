@@ -63,7 +63,6 @@ const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
   useEffect(() => {
     let instance;
     let zoom = 1;
-    return;
     const loaded = () => {
       instance = panzoom(document.querySelector("#panthis"), {
         onTouch: function(e) {
