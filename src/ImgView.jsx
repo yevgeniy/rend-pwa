@@ -67,7 +67,7 @@ const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
       instance = panzoom(document.querySelector("#panthis"), {
         onTouch: function(e) {
           alert(e.touches);
-          e.touches && e.touches.forEach(v => alert(v.id));
+          [...e.touches].forEach(v => alert(v.id));
           if (e.target.id === "backButton" || e.target.id === "menuButton")
             return false;
           return true;
