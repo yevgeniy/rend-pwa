@@ -3,6 +3,7 @@ import { withStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
+import Renew from "@material-ui/icons/Autorenew";
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
 import Drawer from "@material-ui/core/Drawer";
@@ -10,8 +11,8 @@ import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
 
-const ImgList = ({ classes, state, db, states, setNav, imgs: propImgs }) => {
-  const [imgs, updateImage] = useImages(db, state, propImgs);
+const ImgList = ({ classes, state, db, states, setNav }) => {
+  const [imgs, updateImage, setImages] = useImages(db, state);
   const [selectedImage, setSelectedImage] = useState(null);
   const [open, setOpen] = useState(false);
   const openDrawer = () => {
@@ -58,6 +59,15 @@ const ImgList = ({ classes, state, db, states, setNav, imgs: propImgs }) => {
       <IconButton className={classes.menuButton} onClick={openDrawer}>
         <MenuIcon />
       </IconButton>
+      {state === "__MARKED__" ? (
+        <IconButton
+          className={classes.renewButton}
+          onClick={() => setImages(null)}
+        >
+          <Renew />
+        </IconButton>
+      ) : null}
+
       <Loading test={!!imgs}>
         <div
           className={classes.imgsContainer}
@@ -125,15 +135,25 @@ export default withStyles(theme => {
       "&:hover": {
         background: theme.palette.secondary.light
       }
+    },
+    renewButton: {
+      position: "fixed",
+      top: 5,
+      left: 65,
+      background: "blue",
+      opacity: 0.8,
+      color: "#dfdfdf",
+      "&:hover": {
+        background: "lightblue"
+      }
     }
   };
 })(ImgList);
 
-function useImages(db, state, propImgs) {
-  const [images, setImages] = useState(propImgs);
+function useImages(db, state) {
+  const [images, setImages] = useState(null);
 
   useEffect(() => {
-    if (images) return;
     if (state === "__MARKED__") {
       getMarkedImages(db)
         .then(res => setImages(res))
@@ -146,7 +166,7 @@ function useImages(db, state, propImgs) {
         .catch(err => {
           throw err;
         });
-  }, [db, state, images]);
+  }, [db, state]);
 
   const updateImage = async (id, props) => {
     await db.collection("images").updateOne({ id: id }, { $set: props });
@@ -155,7 +175,7 @@ function useImages(db, state, propImgs) {
     setImages([...images]);
   };
 
-  return [images, updateImage];
+  return [images, updateImage, setImages];
 }
 async function getStateImages(db, state) {
   let images = await db
