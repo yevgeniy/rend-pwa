@@ -53,8 +53,10 @@ const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
   useEffect(() => {
     const work = e => e.preventDefault();
     document.body.addEventListener("touchmove", work);
+    document.body.style.touchAction = "none";
     return () => {
       document.body.removeEventListener("touchmove", work);
+      document.body.style.touchAction = "";
     };
   });
 
