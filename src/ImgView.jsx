@@ -17,6 +17,7 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
 
   useEffect(() => {
     let instance;
+    let zoom;
     const loaded = () => {
       instance = panzoom(document.querySelector("#panthis"), {
         onTouch: function(e) {
@@ -30,9 +31,9 @@ const ImgView = ({ classes, img, db, setSelectedImage }) => {
       const origWidth = imgRef.current.getBoundingClientRect().width;
       const work = e => {
         setTimeout(() => {
-          const z = imgRef.current.getBoundingClientRect().width / origWidth;
-          setZoom(z);
-          if (1.05 > z && z >= 1) e.moveTo(0, 0);
+          zoom = imgRef.current.getBoundingClientRect().width / origWidth;
+          setZoom(zoom);
+          if (1.05 > zoom && zoom >= 1) e.moveTo(0, 0);
         }, 100);
       };
       instance.on("zoom", work);
