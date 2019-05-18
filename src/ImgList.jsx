@@ -143,8 +143,10 @@ export default withStyles(theme => {
       background: "blue",
       opacity: 0.8,
       color: "#dfdfdf",
+      transition: "ease all 300ms",
       "&:hover": {
-        background: "lightblue"
+        background: "lightblue",
+        color: "darkblue"
       }
     }
   };
