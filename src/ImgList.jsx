@@ -154,6 +154,8 @@ function useImages(db, state) {
   const [images, setImages] = useState(null);
 
   useEffect(() => {
+    if (images) return;
+
     if (state === "__MARKED__") {
       getMarkedImages(db)
         .then(res => setImages(res))
@@ -166,7 +168,7 @@ function useImages(db, state) {
         .catch(err => {
           throw err;
         });
-  }, [db, state]);
+  }, [db, state, images]);
 
   const updateImage = async (id, props) => {
     await db.collection("images").updateOne({ id: id }, { $set: props });
