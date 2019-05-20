@@ -34,6 +34,50 @@ const Loading = ({ classes, test, children }) => {
   );
 };
 
+function useShowContent(loaded) {
+  const [opacity, setOpacity] = useState(0);
+  const [showContent, setShowContent] = useState(false);
+  useEffect(() => {
+    if (!loaded) {
+      setOpacity(1);
+      setShowContent(false);
+    } else {
+      setOpacity(0);
+      setTimeout(() => setShowContent(true), 500);
+    }
+  }, [loaded]);
+
+  return [opacity, showContent];
+}
+
+function useDelayLoading(test) {
+  const ti = useRef();
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!!test) return;
+
+    ti.current = +new Date();
+    setLoaded(false);
+  }, [test]);
+
+  useEffect(() => {
+    if (!ti.current) return;
+
+    const tf = +new Date();
+
+    if (test) {
+      if (tf - ti.current > DELAY) setLoaded(true);
+      else {
+        const res = DELAY - (tf - ti.current);
+        setTimeout(() => setLoaded(true), res);
+      }
+    }
+  }, [test]);
+
+  return loaded;
+}
+
 export default withStyles(theme => {
   return {
     container: {
@@ -50,40 +94,3 @@ export default withStyles(theme => {
     }
   };
 })(Loading);
-
-function useShowContent(loaded) {
-  const [opacity, setOpacity] = useState(0);
-  const [showContent, setShowContent] = useState(false);
-  useEffect(() => {
-    if (!loaded) setOpacity(1);
-    else {
-      setOpacity(0);
-      setTimeout(() => setShowContent(true), 500);
-    }
-  }, [loaded]);
-
-  return [opacity, showContent];
-}
-
-function useDelayLoading(test) {
-  const ti = useRef();
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    ti.current = +new Date();
-  }, []);
-
-  useEffect(() => {
-    const tf = +new Date();
-
-    if (test) {
-      if (tf - ti.current > DELAY) setLoaded(true);
-      else {
-        const res = DELAY - (tf - ti.current);
-        setTimeout(() => setLoaded(true), res);
-      }
-    }
-  }, [test]);
-
-  return loaded;
-}

@@ -54,9 +54,11 @@ const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
     const work = e => e.preventDefault();
     document.addEventListener("touchmove", work);
     document.body.style.touchAction = "none";
+    document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("touchmove", work);
       document.body.style.touchAction = "";
+      document.body.style.overflow = "";
     };
   }, []);
 

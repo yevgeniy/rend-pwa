@@ -72,9 +72,9 @@ const ImgList = ({ classes, state, db, states, setNav }) => {
         <div
           className={classes.imgsContainer}
           style={{
-            display: selectedImage ? "none" : ""
-            // overflow: selectedImage ? "hidden" : "",
-            // pointerEvents: selectedImage ? "none" : ""
+            // display: selectedImage ? "none" : ""
+            overflow: selectedImage ? "hidden" : "",
+            pointerEvents: selectedImage ? "none" : ""
           }}
         >
           {(imgs || []).map(img => {
