@@ -27,6 +27,9 @@ const App = ({ classes }) => {
                 console.log("settingdb");
                 setDb(mongodb.db("rend"));
             });
+        return () => {
+            client.auth.logout();
+        };
     }, []);
 
     useEffect(() => {
