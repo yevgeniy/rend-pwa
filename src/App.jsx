@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
 import {
     Stitch,
-    AnonymousCredential,
     RemoteMongoClient,
-    UserPasswordCredential,
     UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
 import { withStyles } from "@material-ui/core/styles";
