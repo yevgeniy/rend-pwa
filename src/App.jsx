@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import {
     Stitch,
     AnonymousCredential,
-    RemoteMongoClient
+    RemoteMongoClient,
+    UserPasswordCredential,
+    UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
 import { withStyles } from "@material-ui/core/styles";
 import Loading from "./Loading";
@@ -21,12 +23,14 @@ const App = ({ classes }) => {
             RemoteMongoClient.factory,
             "mongodb-atlas"
         );
-        client.auth
-            .loginWithCredential(new AnonymousCredential())
-            .then(user => {
-                console.log("settingdb");
-                setDb(mongodb.db("rend"));
-            });
+
+        const credential = new UserApiKeyCredential(
+            "vw2VXfikom72Czi3pyUHjoMXvmjTUEEuh5aNJ6rPgAVGd2Da9u9XTHc3BFguxcBe"
+        );
+        client.auth.loginWithCredential(credential).then(user => {
+            console.log("settingdb");
+            setDb(mongodb.db("rend"));
+        });
         return () => {
             client.auth.logout();
         };
