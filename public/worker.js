@@ -15,7 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License
  */
-'use strict';
+
+
 
 // CODELAB: Update cache names any time any of the cached files change.
 const CACHE_NAME = 'static-cache-v1';
@@ -46,7 +47,7 @@ self.addEventListener('activate', (evt) => {
       return Promise.all(keyList.map((key) => {
         if (key !== CACHE_NAME) {
           console.log('[ServiceWorker] Removing old cache', key);
-          return caches.delete(key); 
+          return caches.delete(key);
         }
       }));
     })
@@ -63,13 +64,52 @@ self.addEventListener('fetch', (evt) => {
     return;
   }
   evt.respondWith(
-      fetch(evt.request)
-          .catch(() => {
-            return caches.open(CACHE_NAME)
-                .then((cache) => {
-                  return cache.match('offline.html');
-                });
-          })
+    fetch(evt.request)
+      .catch(() => {
+        return caches.open(CACHE_NAME)
+          .then((cache) => {
+            return cache.match('offline.html');
+          });
+      })
   );
-
 });
+
+importScripts('./worker-reducer.js');
+
+const initialState = {
+  hello: 'world'
+};
+
+const store = createStore((state = {}, action) => {
+  switch (action.type) {
+    case 'result':
+      return { ...state, result: action.result };
+    default:
+      return state;
+  }
+}, initialState);
+self.addEventListener('message', async e => {
+
+  //console.log(e.data);
+
+  const state = store.dispatch(e.data);
+  console.log(window);
+
+  // const allClients = await clients.matchAll({ includeUncontrolled: true })
+  // for (const c of allClients)
+  //   c.postMessage('hello back 2');
+
+
+})
+
+////////////////////////
+//var m=new MessageChannel(); m.port1.onmessage=e=>console.log(e); navigator.serviceWorker.controller.postMessage('hello', [m.port2])
+
+//e.ports[0].postMessage('hello back');
+
+///////////////////////
+//navigator.serviceWorker.addEventListener('message', m=>console.log(m)); navigator.serviceWorker.controller.postMessage('hi');
+
+// const allClients = await clients.matchAll({ includeUncontrolled: true })
+//   for (const c of allClients)
+//     c.postMessage('hello back 2');
