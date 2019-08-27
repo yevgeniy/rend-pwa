@@ -74,32 +74,30 @@ self.addEventListener('fetch', (evt) => {
   );
 });
 
-importScripts('./worker-reducer.js');
+importScripts('./idb.js');
 
-const initialState = {
-  hello: 'world'
-};
-
-const store = createStore((state = {}, action) => {
-  switch (action.type) {
-    case 'result':
-      return { ...state, result: action.result };
-    default:
-      return state;
-  }
-}, initialState);
 self.addEventListener('message', async e => {
-
-  //console.log(e.data);
-
-  const state = store.dispatch(e.data);
-  console.log(window);
-
-  // const allClients = await clients.matchAll({ includeUncontrolled: true })
-  // for (const c of allClients)
-  //   c.postMessage('hello back 2');
-
-
+  let res = null;
+  let state = null;
+  switch (e.data.command) {
+    case 'state-set':
+      state = await saveState(e.data.state)
+      res = { success: true, state }
+      break;
+    case 'state-update':
+      state = await updateState(e.data.state);
+      res = { success: true, state }
+      break;
+    case 'initial-state-get':
+      state = await getState();
+      res = { success: true, state };
+      break;
+    default:
+      res = { success: false, message: 'check "command" prop' }
+  }
+  const allClients = await clients.matchAll({ includeUncontrolled: true })
+  for (const c of allClients)
+    c.postMessage(res);
 })
 
 ////////////////////////
