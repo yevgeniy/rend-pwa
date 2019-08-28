@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { withStyles } from "@material-ui/core/styles";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import ListItemText from "@material-ui/core/ListItemText";
-import Divider from "@material-ui/core/Divider";
-// import InboxIcon from '@material-ui/icons/Inbox';
-// import DraftsIcon from '@material-ui/icons/Drafts';
+import {List, ListItem, ListItemText, Divider} from '@material-ui/core';
 import ImgList from "./ImgList";
+import {useSelectedState} from './hooks';
 
 const StatesView = ({ classes, states, setNav, db }) => {
   const [opacity, setOpacity] = useState(0);
-  const [selectedState, setSelectedState] = useState(null);
+  const {selectedState, setSelectedState} = useSelectedState();
   useEffect(() => {
     const t = setTimeout(() => setOpacity(1), 100);
     return () => clearTimeout(t);

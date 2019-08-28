@@ -10,9 +10,10 @@ import Drawer from "@material-ui/core/Drawer";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
+import {useImages} from './hooks';
 
 const ImgList = ({ classes, state, db, states, setNav }) => {
-  const [imgs, updateImage, setImages] = useImages(db, state);
+  const {images:imgs, updateImage, setImages} = useImages(db, state);
   const [selectedImage, setSelectedImage] = useState(null);
   const [open, setOpen] = useState(false);
   const openDrawer = () => {
@@ -152,51 +153,4 @@ export default withStyles(theme => {
   };
 })(ImgList);
 
-function useImages(db, state) {
-  const [images, setImages] = useState(null);
 
-  useEffect(() => {
-    if (images) return;
-
-    if (state === "__MARKED__") {
-      getMarkedImages(db)
-        .then(res => setImages(res))
-        .catch(err => {
-          throw err;
-        });
-    } else
-      getStateImages(db, state)
-        .then(res => setImages(res))
-        .catch(err => {
-          throw err;
-        });
-  }, [db, state, images]);
-
-  const updateImage = async (id, props) => {
-    await db.collection("images").updateOne({ id: id }, { $set: props });
-    var i = images.findIndex(v => v.id === id);
-    images[i] = { ...images[i], ...props };
-    setImages([...images]);
-  };
-
-  return [images, updateImage, setImages];
-}
-async function getStateImages(db, state) {
-  let images = await db
-    .collection("images")
-    .find({ datetime: state })
-    .toArray();
-  return images;
-}
-async function getMarkedImages(db) {
-  let images = await db
-    .collection("images")
-    .aggregate([{ $match: { marked: true } }, { $sample: { size: 10 } }])
-    .toArray();
-  let drawing = await db
-    .collection("images")
-    .find({ drawing: true })
-    .toArray();
-  images.unshift(...drawing);
-  return images;
-}
