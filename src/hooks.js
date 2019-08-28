@@ -109,32 +109,32 @@ export function useSelectedState() {
     const { state, updateState } = useWorkerState();
 
 
-    let selectedState=null;
+    let selectedState = null;
     const { selectedState: { data, created } = {} } = state || {};
     if (created && time(created).within(3).hours()) {
-        selectedState=data;
+        selectedState = data;
     }
-    const setSelectedState=(data)=> {
+    const setSelectedState = (data) => {
         updateState({
-            selectedState:{data, created:+new Date()},
-            images:null
+            selectedState: { data, created: +new Date() },
+            images: null
         })
     }
-    return {selectedState, setSelectedState};
+    return { selectedState, setSelectedState };
 }
 export function useImages(db, selectedState) {
     let { state, updateState } = useWorkerState();
-    
-    let images=null;
-    state=state||{};
-    let data=(state.images || {}).data
-    let created=(state.images || {}).created;
+
+    let images = null;
+    state = state || {};
+    let data = (state.images || {}).data
+    let created = (state.images || {}).created;
     if (created && time(created).within(3).hours()) {
-        images=data;
+        images = data;
     }
-    const setImages=data=> {
-        updateState({images:{data, created:+new Date()}})
-    }    
+    const setImages = data => {
+        updateState({ images: { data, created: +new Date() } })
+    }
     useEffect(() => {
         if (images) return;
 
@@ -156,30 +156,47 @@ export function useImages(db, selectedState) {
         await db.collection("images").updateOne({ id: id }, { $set: props });
         var i = images.findIndex(v => v.id === id);
         images[i] = { ...images[i], ...props };
-        updateState({images:{data:[...images], created:+new Date()}})
+        updateState({ images: { data: [...images], created: +new Date() } })
     };
-    
-    return {images, updateImage, setImages};
+
+    return { images, updateImage, setImages };
 }
-  async function getStateImages(db, state) {
+export function useSelectedImage() {
+    const { state, updateState } = useWorkerState();
+
+    let selectedImage = null;
+    state = state || {};
+    let data = (state.selectedImage || {}).data;
+    let created = (state.selectedImage || {}).created;
+    if (created && time(created).within(3).hours()) {
+        selectedImage = data;
+    }
+
+    const setSelectedImage = data => {
+        updateState({ selectedImage: { data, created: +new Date() } })
+    }
+    return { selectedImage, setSelectedImage };
+}
+
+async function getStateImages(db, state) {
     let images = await db
-      .collection("images")
-      .find({ datetime: state })
-      .toArray();
+        .collection("images")
+        .find({ datetime: state })
+        .toArray();
     return images;
-  }
-  async function getMarkedImages(db) {
+}
+async function getMarkedImages(db) {
     let images = await db
-      .collection("images")
-      .aggregate([{ $match: { marked: true } }, { $sample: { size: 10 } }])
-      .toArray();
+        .collection("images")
+        .aggregate([{ $match: { marked: true } }, { $sample: { size: 10 } }])
+        .toArray();
     let drawing = await db
-      .collection("images")
-      .find({ drawing: true })
-      .toArray();
+        .collection("images")
+        .find({ drawing: true })
+        .toArray();
     images.unshift(...drawing);
     return images;
-  }
+}
 
 const Hour1 = 3.6e+6;
 function time(ti) {

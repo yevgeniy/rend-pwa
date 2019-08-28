@@ -10,11 +10,12 @@ import Drawer from "@material-ui/core/Drawer";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
-import {useImages} from './hooks';
+import { useImages, useSelectedImage } from './hooks';
 
 const ImgList = ({ classes, state, db, states, setNav }) => {
-  const {images:imgs, updateImage, setImages} = useImages(db, state);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const { images: imgs, updateImage, setImages } = useImages(db, state);
+
+  const { selectedImage, setSelectedImage } = useSelectedImage();
   const [open, setOpen] = useState(false);
   const openDrawer = () => {
     setOpen(true);

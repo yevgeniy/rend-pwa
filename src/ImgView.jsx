@@ -67,7 +67,7 @@ const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
     let zoom = 1;
     const loaded = () => {
       instance = panzoom(document.querySelector("#panthis"), {
-        onTouch: function(e) {
+        onTouch: function (e) {
           let paths = [...e.composedPath()].map(v => v.id);
           if (paths.some(v => v === "backButton" || v === "menuButton"))
             return false;
