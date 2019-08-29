@@ -5,26 +5,34 @@ import {
     UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
 
-let State = null;
 let process$ = Promise.resolve();
-function useWorkerState() {
-    const [state, setState] = useState(State);
-    State = state;
-    useEffect(() => {
-        if (state)
-            return;
+const Store={
+    runOnUpdates:[],
+    subscribe:function(fn) {
+        this.runOnUpdates.push(fn)
+        return {
+            destroy:()=>{
+                this.runOnUpdates=this.runOnUpdates.filter(v=>v!=fn);
+            }
+        }
+    },
+    state:null,
+    init:function() {
         const messageGot = m => {
             navigator.serviceWorker.removeEventListener('message', messageGot);
             if (!m.data.success)
                 throw new Error(m.data.message);
 
-            setState(m.data.state || {});
+            this.state=m.data.state||{};
+            this.broadcast();
         }
         navigator.serviceWorker.addEventListener('message', messageGot);
         navigator.serviceWorker.controller.postMessage({ command: 'initial-state-get' });
-
-    }, []);
-    const updateState = async st => {
+    },
+    broadcast:function() {
+        this.runOnUpdates.forEach(v=>v(this.state));
+    },
+    updateState:function(st) {
         process$ = process$.then(() => new Promise(res => {
 
             const messageGot = m => {
@@ -32,12 +40,27 @@ function useWorkerState() {
                 if (!m.data.success)
                     throw new Error(m.data.message);
 
-                setState(m.data.state);
+                this.state=m.data.state||{};
+                this.broadcast();
                 res();
             }
             navigator.serviceWorker.addEventListener('message', messageGot);
             navigator.serviceWorker.controller.postMessage({ command: 'state-update', state: st });
         }))
+    }
+}
+Store.init();
+
+
+function useWorkerState() {
+    const [state, setState] = useState(Store.state);
+    
+    useEffect(() => {
+        const b=Store.subscribe(setState)
+        return ()=>b.destroy();
+    },[]);
+    const updateState = st => {
+        Store.updateState(st);
     }
     return {
         state, updateState
@@ -72,7 +95,6 @@ export function useStates() {
     useEffect(() => {
         if (!db) return;
 
-        console.log("getting states");
         getStates(db)
             .then(data => updateState({ states: { created: +new Date(), data } }))
             .catch(e => console.log(e));
@@ -122,8 +144,14 @@ export function useSelectedState() {
     }
     return { selectedState, setSelectedState };
 }
-export function useImages(db, selectedState) {
+export function useImages(db) {
     let { state, updateState } = useWorkerState();
+    
+    let selectedState = null;
+    const { selectedState: { data:selectedStateData, created:selectedStateCreated } = {} } = state || {};
+    if (selectedStateCreated && time(selectedStateCreated).within(3).hours()) {
+        selectedState = selectedStateData;
+    }
 
     let images = null;
     state = state || {};
@@ -138,6 +166,7 @@ export function useImages(db, selectedState) {
     useEffect(() => {
         if (images) return;
 
+console.log(selectedState)        
         if (selectedState === "__MARKED__")
             getMarkedImages(db)
                 .then(res => setImages(res))
@@ -153,16 +182,18 @@ export function useImages(db, selectedState) {
     }, [db, selectedState, images]);
 
     const updateImage = async (id, props) => {
+
         await db.collection("images").updateOne({ id: id }, { $set: props });
         var i = images.findIndex(v => v.id === id);
         images[i] = { ...images[i], ...props };
+console.log('a', id, props)                
         updateState({ images: { data: [...images], created: +new Date() } })
     };
 
     return { images, updateImage, setImages };
 }
 export function useSelectedImage() {
-    const { state, updateState } = useWorkerState();
+    let { state, updateState } = useWorkerState();
 
     let selectedImage = null;
     state = state || {};

@@ -14,14 +14,16 @@ import { useImages, useSelectedImage } from './hooks';
 
 const ImgList = ({ classes, state, db, states, setNav }) => {
   const { images: imgs, updateImage, setImages } = useImages(db, state);
-
-  const { selectedImage, setSelectedImage } = useSelectedImage();
+  const { selectedImage:selectedImageId, setSelectedImage } = useSelectedImage();
   const [open, setOpen] = useState(false);
+
+  const selectedImage = (imgs||[]).find(v=>v.id===selectedImageId);
+
   const openDrawer = () => {
     setOpen(true);
   };
   const selectImg = img => {
-    setSelectedImage(img);
+    setSelectedImage(img.id);
   };
   const renderIconsContainer = img => {
     if (img.marked || img.drawing || img.drawn) {
