@@ -9,7 +9,6 @@ import { useStates, useDb } from './hooks';
 const useStyles = makeStyles(theme => {
     return {
         root: {
-            background: theme.palette.background.default
         }
     }
 })
@@ -17,9 +16,8 @@ const useStyles = makeStyles(theme => {
 const App = React.memo(() => {
     const classes = useStyles()
     const db = useDb();
-    const states = useStates(null);
+    let states = useStates(null);
     const [nav, setNav] = useState(null);
-
     if (!db)
         return null;
     return (

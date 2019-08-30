@@ -2,6 +2,9 @@ import React, { useEffect, useState, useRef } from "react";
 import { makeStyles } from "@material-ui/core";
 import icon from "./loader.ico";
 
+const SPEED = 500;
+const DELAY = 1500;
+
 const useStyles = makeStyles(theme => {
   return {
     root: {
@@ -10,17 +13,15 @@ const useStyles = makeStyles(theme => {
       width: "100%",
       justifyContent: "center",
       alignItems: "center",
-      transition: `ease-out all ${SPEED}ms`
+      transition: `all ${SPEED}ms ease-out`,
     },
     img: {
       width: 50,
-      transform: "translate(0,-50)"
+      transform: "translate(0,-50px)"
     }
   }
-})
+}, { name: 'loader' })
 
-const SPEED = 500;
-const DELAY = 1500;
 
 const Loading = React.memo(({ test, children }) => {
   const classes = useStyles();
@@ -44,11 +45,9 @@ const Loading = React.memo(({ test, children }) => {
   notloadedFirstTest.current = false;
 
   return (
-    <>
-      <div className={classes.root} style={containerStyle}>
-        <img className={classes.img} src={icon} alt="" />
-      </div>
-    </>
+    <div className={classes.root} style={containerStyle}>
+      <img className={classes.img} src={icon} alt="" />
+    </div>
   );
 });
 
