@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => {
     }
 })
 
-const App = () => {
+const App = React.memo(() => {
     const classes = useStyles()
     const db = useDb();
     const states = useStates(null);
@@ -29,6 +29,6 @@ const App = () => {
             </Loading>
         </div>
     );
-};
+});
 
 export default App;
