@@ -18,35 +18,35 @@ const credential = new UserApiKeyCredential(
 export const StateContext = React.createContext();
 
 let process$ = Promise.resolve();
-const Store={
-    runOnUpdates:[],
-    subscribe:function(fn) {
+const Store = {
+    runOnUpdates: [],
+    subscribe: function (fn) {
         this.runOnUpdates.push(fn)
         return {
-            destroy:()=>{
-                this.runOnUpdates=this.runOnUpdates.filter(v=>v!=fn);
+            destroy: () => {
+                this.runOnUpdates = this.runOnUpdates.filter(v => v != fn);
             }
         }
     },
-    state:null,
-    init:function() {
+    state: null,
+    init: function () {
         const messageGot = m => {
             navigator.serviceWorker.removeEventListener('message', messageGot);
             if (!m.data.success)
                 throw new Error(m.data.message);
 
-            this.state=m.data.state||{};
+            this.state = m.data.state || {};
             this.broadcast();
         }
         navigator.serviceWorker.addEventListener('message', messageGot);
         navigator.serviceWorker.controller.postMessage({ command: 'initial-state-get' });
     },
-    broadcast:function() {
-        this.runOnUpdates.forEach(v=> {
-            v(this.state)  
+    broadcast: function () {
+        this.runOnUpdates.forEach(v => {
+            v(this.state)
         });
     },
-    updateState:function(st) {
+    updateState: function (st) {
         process$ = process$.then(() => new Promise(res => {
 
             const messageGot = m => {
@@ -54,7 +54,7 @@ const Store={
                 if (!m.data.success)
                     throw new Error(m.data.message);
 
-                this.state=m.data.state||{};
+                this.state = m.data.state || {};
                 this.broadcast();
                 res();
             }
@@ -67,23 +67,23 @@ Store.init();
 
 
 export function useCreateStore() {
-    const [state, setState] = useState(Store.state);    
+    const [state, setState] = useState(Store.state);
     useEffect(() => {
-        const b=Store.subscribe(setState)
-        return ()=>b.destroy();
-    },[]);
-    
+        const b = Store.subscribe(setState)
+        return () => b.destroy();
+    }, []);
+
     return state;
 }
 export function useStore() {
-    const state=useContext(StateContext);
-console.log('rerun', state)
+    const state = useContext(StateContext);
+    console.log('rerun', state)
     const updateState = st => {
-console.log('update', st)        
+        console.log('update', st)
         Store.updateState(st);
     }
 
-    return {state,updateState};
+    return { state, updateState };
 }
 
 export function useDb() {
@@ -157,8 +157,8 @@ export function useSelectedState() {
 }
 export function useImages(db) {
     let { state, updateState } = useStore();
-    const {selectedState}=useSelectedState();
-    
+    const { selectedState } = useSelectedState();
+
     // let selectedState = null;
     // const { selectedState: { data:selectedStateData, created:selectedStateCreated } = {} } = state || {};
     // if (selectedStateCreated && time(selectedStateCreated).within(3).hours()) {
@@ -177,7 +177,7 @@ export function useImages(db) {
     }
     useEffect(() => {
         if (images) return;
- 
+
         if (selectedState === "__MARKED__")
             getMarkedImages(db)
                 .then(res => setImages(res))
@@ -185,7 +185,7 @@ export function useImages(db) {
                     throw err;
                 });
         else
-            getStateImages(db, state)
+            getStateImages(db, selectedState)
                 .then(res => setImages(res))
                 .catch(err => {
                     throw err;
@@ -196,7 +196,7 @@ export function useImages(db) {
 
         await db.collection("images").updateOne({ id: id }, { $set: props });
         var i = images.findIndex(v => v.id === id);
-        images[i] = { ...images[i], ...props };              
+        images[i] = { ...images[i], ...props };
         updateState({ images: { data: [...images], created: +new Date() } })
     };
 
