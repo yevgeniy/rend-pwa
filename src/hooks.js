@@ -159,12 +159,6 @@ export function useImages(db) {
     let { state, updateState } = useStore();
     const { selectedState } = useSelectedState();
 
-    // let selectedState = null;
-    // const { selectedState: { data:selectedStateData, created:selectedStateCreated } = {} } = state || {};
-    // if (selectedStateCreated && time(selectedStateCreated).within(3).hours()) {
-    //     selectedState = selectedStateData;
-    // }
-
     let images = null;
     state = state || {};
     let data = (state.images || {}).data

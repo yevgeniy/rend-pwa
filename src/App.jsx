@@ -1,11 +1,21 @@
 import React, { useState } from "react";
 
-import { withStyles } from "@material-ui/core/styles";
+import { makeStyles } from '@material-ui/core';
 import Loading from "./Loading";
 import StatesView from "./StatesView";
-import {useStates, useDb} from './hooks';
+import { useStates, useDb } from './hooks';
 
-const App = ({ classes }) => {
+
+const useStyles = makeStyles(theme => {
+    return {
+        root: {
+            background: theme.palette.background.default
+        }
+    }
+})
+
+const App = () => {
+    const classes = useStyles()
     const db = useDb();
     const states = useStates(null);
     const [nav, setNav] = useState(null);
@@ -13,7 +23,7 @@ const App = ({ classes }) => {
     if (!db)
         return null;
     return (
-        <div className={classes.container}>
+        <div className={classes.root}>
             <Loading test={!!states}>
                 {nav || <StatesView states={states} setNav={setNav} db={db} />}
             </Loading>
@@ -21,12 +31,4 @@ const App = ({ classes }) => {
     );
 };
 
-export default withStyles(theme => {
-    return {
-        container: {
-            background: theme.palette.background.default
-        }
-    };
-})(App);
-
-
+export default App;
