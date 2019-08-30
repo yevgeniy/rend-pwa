@@ -1,9 +1,21 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     Stitch,
     RemoteMongoClient,
     UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
+var Client = Stitch.initializeDefaultAppClient("rend-app-nczgz");
+const Mongodb = Client.getServiceClient(
+    RemoteMongoClient.factory,
+    "mongodb-atlas"
+);
+
+const credential = new UserApiKeyCredential(
+    "vw2VXfikom72Czi3pyUHjoMXvmjTUEEuh5aNJ6rPgAVGd2Da9u9XTHc3BFguxcBe"
+);
+
+
+export const StateContext = React.createContext();
 
 let process$ = Promise.resolve();
 const Store={
@@ -30,7 +42,9 @@ const Store={
         navigator.serviceWorker.controller.postMessage({ command: 'initial-state-get' });
     },
     broadcast:function() {
-        this.runOnUpdates.forEach(v=>v(this.state));
+        this.runOnUpdates.forEach(v=> {
+            v(this.state)  
+        });
     },
     updateState:function(st) {
         process$ = process$.then(() => new Promise(res => {
@@ -52,29 +66,26 @@ const Store={
 Store.init();
 
 
-function useWorkerState() {
-    const [state, setState] = useState(Store.state);
-    
+export function useCreateStore() {
+    const [state, setState] = useState(Store.state);    
     useEffect(() => {
         const b=Store.subscribe(setState)
         return ()=>b.destroy();
     },[]);
+    
+    return state;
+}
+export function useStore() {
+    const state=useContext(StateContext);
+console.log('rerun', state)
     const updateState = st => {
+console.log('update', st)        
         Store.updateState(st);
     }
-    return {
-        state, updateState
-    }
-}
-var Client = Stitch.initializeDefaultAppClient("rend-app-nczgz");
-const Mongodb = Client.getServiceClient(
-    RemoteMongoClient.factory,
-    "mongodb-atlas"
-);
 
-const credential = new UserApiKeyCredential(
-    "vw2VXfikom72Czi3pyUHjoMXvmjTUEEuh5aNJ6rPgAVGd2Da9u9XTHc3BFguxcBe"
-);
+    return {state,updateState};
+}
+
 export function useDb() {
     const [db, setDb] = useState(null);
 
@@ -89,12 +100,12 @@ export function useDb() {
 
     return db;
 }
+
 export function useStates() {
     const db = useDb();
-    const { state, updateState } = useWorkerState();
+    const { state, updateState } = useStore();
     useEffect(() => {
         if (!db) return;
-
         getStates(db)
             .then(data => updateState({ states: { created: +new Date(), data } }))
             .catch(e => console.log(e));
@@ -128,7 +139,7 @@ async function getStates(db) {
     return res.sort((a, b) => (a >= b ? 1 : -1));
 }
 export function useSelectedState() {
-    const { state, updateState } = useWorkerState();
+    const { state, updateState } = useStore();
 
 
     let selectedState = null;
@@ -145,7 +156,8 @@ export function useSelectedState() {
     return { selectedState, setSelectedState };
 }
 export function useImages(db) {
-    let { state, updateState } = useWorkerState();
+    let { state, updateState } = useStore();
+    //const {selectedState}=useSelectedState();
     
     let selectedState = null;
     const { selectedState: { data:selectedStateData, created:selectedStateCreated } = {} } = state || {};
@@ -165,8 +177,7 @@ export function useImages(db) {
     }
     useEffect(() => {
         if (images) return;
-
-console.log(selectedState)        
+ 
         if (selectedState === "__MARKED__")
             getMarkedImages(db)
                 .then(res => setImages(res))
@@ -185,15 +196,14 @@ console.log(selectedState)
 
         await db.collection("images").updateOne({ id: id }, { $set: props });
         var i = images.findIndex(v => v.id === id);
-        images[i] = { ...images[i], ...props };
-console.log('a', id, props)                
+        images[i] = { ...images[i], ...props };              
         updateState({ images: { data: [...images], created: +new Date() } })
     };
 
     return { images, updateImage, setImages };
 }
 export function useSelectedImage() {
-    let { state, updateState } = useWorkerState();
+    let { state, updateState } = useStore();
 
     let selectedImage = null;
     state = state || {};

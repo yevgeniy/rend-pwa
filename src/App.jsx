@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { withStyles } from "@material-ui/core/styles";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
-import { useStates, useDb } from './hooks';
+import {useStates, useDb} from './hooks';
 
 const App = ({ classes }) => {
     const db = useDb();
@@ -12,7 +12,6 @@ const App = ({ classes }) => {
 
     if (!db)
         return null;
-
     return (
         <div className={classes.container}>
             <Loading test={!!states}>
