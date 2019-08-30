@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core";
 import Drawer from "@material-ui/core/Drawer";
 import IconButton from "@material-ui/core/IconButton";
 import List from "@material-ui/core/List";
@@ -13,33 +13,63 @@ import MenuIcon from "@material-ui/icons/Menu";
 import BackIcon from "@material-ui/icons/Reply";
 import panzoom from "panzoom";
 
-function useMarked(img, updateImage) {
-  const [marked, setMarked] = useState(img.marked);
+const useStyles = makeStyles(theme => {
+  return {
+    container: {
+      top: 0,
+      left: 0,
+      position: "fixed",
+      height: "100vh",
+      width: "100%",
+      background: theme.palette.background.default
+    },
+    imgContainer: {
+      position: "relative",
+      height: "100vh",
+      width: "100%"
+    },
+    img: {
+      maxWidth: "98%",
+      maxHeight: "98%",
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      margin: "auto",
+      transition: "ease all 300ms"
+    },
+    backButton: {
+      position: "fixed",
+      zIndex: 9999999,
+      left: 5,
+      top: 5,
+      background: theme.palette.secondary.dark,
+      opacity: 0.8,
+      color: theme.palette.secondary.contrastText,
+      transition: "ease all 300ms",
+      "&:hover": {
+        background: theme.palette.secondary.light
+      }
+    },
+    menuButton: {
+      position: "fixed",
+      zIndex: 9999999,
+      right: 5,
+      top: 5,
+      background: theme.palette.primary.dark,
+      opacity: 0.8,
+      color: theme.palette.primary.contrastText,
+      transition: "ease all 300ms",
+      "&:hover": {
+        background: theme.palette.primary.light
+      }
+    }
+  };
+})
 
-  useEffect(() => {
-    updateImage(img.id, { marked });
-  }, [marked]);
-
-  return [marked, setMarked];
-}
-function useDrawn(img, updateImage) {
-  const [drawn, setDrawn] = useState(img.drawn);
-
-  useEffect(() => {
-    updateImage(img.id, { drawn });
-  }, [drawn]);
-  return [drawn, setDrawn];
-}
-function useDrawing(img, updateImage) {
-  const [drawing, setDrawing] = useState(img.drawing);
-
-  useEffect(() => {
-    updateImage(img.id, { drawing });
-  }, [drawing]);
-  return [drawing, setDrawing];
-}
-
-const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
+const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
+  const classes = useStyles();
   const imgRef = useRef();
   const [zoom, setZoom] = useState(1);
   const [open, setOpen] = useState(false);
@@ -142,59 +172,34 @@ const ImgView = ({ classes, img, updateImage, setSelectedImage }) => {
       </Drawer>
     </div>
   );
-};
+});
 
-export default withStyles(theme => {
-  return {
-    container: {
-      top: 0,
-      left: 0,
-      position: "fixed",
-      height: "100vh",
-      width: "100%",
-      background: theme.palette.background.default
-    },
-    imgContainer: {
-      position: "relative",
-      height: "100vh",
-      width: "100%"
-    },
-    img: {
-      maxWidth: "98%",
-      maxHeight: "98%",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      margin: "auto",
-      transition: "ease all 300ms"
-    },
-    backButton: {
-      position: "fixed",
-      zIndex: 9999999,
-      left: 5,
-      top: 5,
-      background: theme.palette.secondary.dark,
-      opacity: 0.8,
-      color: theme.palette.secondary.contrastText,
-      transition: "ease all 300ms",
-      "&:hover": {
-        background: theme.palette.secondary.light
-      }
-    },
-    menuButton: {
-      position: "fixed",
-      zIndex: 9999999,
-      right: 5,
-      top: 5,
-      background: theme.palette.primary.dark,
-      opacity: 0.8,
-      color: theme.palette.primary.contrastText,
-      transition: "ease all 300ms",
-      "&:hover": {
-        background: theme.palette.primary.light
-      }
-    }
-  };
-})(ImgView);
+function useMarked(img, updateImage) {
+
+  const [marked, setMarked] = useState(img.marked);
+
+  useEffect(() => {
+    updateImage(img.id, { marked });
+  }, [marked]);
+
+  return [marked, setMarked];
+}
+function useDrawn(img, updateImage) {
+  const [drawn, setDrawn] = useState(img.drawn);
+
+  useEffect(() => {
+    updateImage(img.id, { drawn });
+  }, [drawn]);
+  return [drawn, setDrawn];
+}
+function useDrawing(img, updateImage) {
+  const [drawing, setDrawing] = useState(img.drawing);
+
+  useEffect(() => {
+    updateImage(img.id, { drawing });
+  }, [drawing]);
+  return [drawing, setDrawing];
+}
+
+
+export default ImgView;

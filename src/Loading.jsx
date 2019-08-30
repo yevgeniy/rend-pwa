@@ -1,11 +1,29 @@
 import React, { useEffect, useState, useRef } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import { makeStyles } from "@material-ui/core";
 import icon from "./loader.ico";
+
+const useStyles = makeStyles(theme => {
+  return {
+    root: {
+      display: "flex",
+      height: "90vh",
+      width: "100%",
+      justifyContent: "center",
+      alignItems: "center",
+      transition: `ease-out all ${SPEED}ms`
+    },
+    img: {
+      width: 50,
+      transform: "translate(0,-50)"
+    }
+  }
+})
 
 const SPEED = 500;
 const DELAY = 1500;
 
-const Loading = ({ classes, test, children }) => {
+const Loading = React.memo(({ test, children }) => {
+  const classes = useStyles();
   const [rat, setRat] = useState(null);
   const notloadedFirstTest = useRef(null);
 
@@ -27,12 +45,12 @@ const Loading = ({ classes, test, children }) => {
 
   return (
     <>
-      <div className={classes.container} style={containerStyle}>
+      <div className={classes.root} style={containerStyle}>
         <img className={classes.img} src={icon} alt="" />
       </div>
     </>
   );
-};
+});
 
 function useShowContent(loaded) {
   const [opacity, setOpacity] = useState(0);
@@ -76,21 +94,6 @@ function useDelayLoading(test) {
   }, [test]);
 
   return loaded;
-}
+};
 
-export default withStyles(theme => {
-  return {
-    container: {
-      display: "flex",
-      height: "90vh",
-      width: "100%",
-      justifyContent: "center",
-      alignItems: "center",
-      transition: `ease-out all ${SPEED}ms`
-    },
-    img: {
-      width: 50,
-      transform: "translate(0,-50)"
-    }
-  };
-})(Loading);
+export default Loading;

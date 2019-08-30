@@ -1,12 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { withStyles } from "@material-ui/core/styles";
-import {List, ListItem, ListItemText, Divider} from '@material-ui/core';
+import { makeStyles } from "@material-ui/core";
+import { List, ListItem, ListItemText, Divider } from '@material-ui/core';
 import ImgList from "./ImgList";
-import {useSelectedState} from './hooks';
+import { useSelectedState } from './hooks';
 
-const StatesView = ({ classes, states, setNav, db }) => {
+const useStyles = makeStyles(theme => {
+  return {
+    root: {
+      width: "100%",
+      transition: "ease all 500ms"
+    }
+  };
+})
+
+const StatesView = React.memo(({ states, setNav, db }) => {
+  const classes = useStyles()
   const [opacity, setOpacity] = useState(0);
-  const {selectedState, setSelectedState} = useSelectedState();
+  const { selectedState, setSelectedState } = useSelectedState();
   useEffect(() => {
     const t = setTimeout(() => setOpacity(1), 100);
     return () => clearTimeout(t);
@@ -19,7 +29,7 @@ const StatesView = ({ classes, states, setNav, db }) => {
   }, [selectedState, setNav]);
 
   return (
-    <div className={classes.container} style={{ opacity: opacity }}>
+    <div className={classes.root} style={{ opacity: opacity }}>
       <List component="nav">
         <ListItem button onClick={() => setSelectedState("__MARKED__")}>
           <ListItemText primary="Marked" />
@@ -37,13 +47,6 @@ const StatesView = ({ classes, states, setNav, db }) => {
       </List>
     </div>
   );
-};
+});
 
-export default withStyles(theme => {
-  return {
-    container: {
-      width: "100%",
-      transition: "ease all 500ms"
-    }
-  };
-})(StatesView);
+export default StatesView;

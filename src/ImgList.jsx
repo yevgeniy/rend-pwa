@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { withStyles } from "@material-ui/core/styles";
+import React, { useState } from "react";
+import { makeStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
 import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
@@ -12,12 +12,66 @@ import StatesView from "./StatesView";
 import ImgView from "./ImgView";
 import { useImages, useSelectedImage } from './hooks';
 
-const ImgList = ({ classes, state, db, states, setNav }) => {
+const useStyles = makeStyles(theme => {
+  return {
+    iconsContainer: {
+      background: "#4f4f4f",
+      textAlign: "left"
+    },
+    icon: {
+      color: theme.palette.common.white,
+      margin: [[1, 5]]
+    },
+    drawingIconsContainer: {
+      background: theme.palette.primary.dark
+    },
+    drawingIcon: {
+      color: theme.palette.primary.dark.contrastText
+    },
+    imgsContainer: {
+      textAlign: "center"
+    },
+    imgContainer: {
+      display: "inline-block",
+      margin: 2,
+      verticalAlign: "top",
+      "& img": {
+        maxWidth: "100%"
+      }
+    },
+    menuButton: {
+      position: "fixed",
+      top: 5,
+      left: 5,
+      background: theme.palette.secondary.dark,
+      opacity: 0.8,
+      color: theme.palette.secondary.contrastText,
+      "&:hover": {
+        background: theme.palette.secondary.light
+      }
+    },
+    renewButton: {
+      position: "fixed",
+      top: 5,
+      left: 65,
+      background: "blue",
+      opacity: 0.8,
+      color: "#dfdfdf",
+      transition: "ease all 300ms",
+      "&:hover": {
+        background: "lightblue",
+        color: "darkblue"
+      }
+    }
+  };
+})
+const ImgList = React.memo(({ state, db, states, setNav }) => {
+  const classes = useStyles();
   const { images: imgs, updateImage, setImages } = useImages(db, state);
-  const { selectedImage:selectedImageId, setSelectedImage } = useSelectedImage();
+  const { selectedImage: selectedImageId, setSelectedImage } = useSelectedImage();
   const [open, setOpen] = useState(false);
 
-  const selectedImage = (imgs||[]).find(v=>v.id===selectedImageId);
+  const selectedImage = (imgs || []).find(v => v.id === selectedImageId);
 
   const openDrawer = () => {
     setOpen(true);
@@ -100,60 +154,8 @@ const ImgList = ({ classes, state, db, states, setNav }) => {
       ) : null}
     </div>
   );
-};
+});
 
-export default withStyles(theme => {
-  return {
-    iconsContainer: {
-      background: "#4f4f4f",
-      textAlign: "left"
-    },
-    icon: {
-      color: theme.palette.common.white,
-      margin: [[1, 5]]
-    },
-    drawingIconsContainer: {
-      background: theme.palette.primary.dark
-    },
-    drawingIcon: {
-      color: theme.palette.primary.dark.contrastText
-    },
-    imgsContainer: {
-      textAlign: "center"
-    },
-    imgContainer: {
-      display: "inline-block",
-      margin: 2,
-      verticalAlign: "top",
-      "& img": {
-        maxWidth: "100%"
-      }
-    },
-    menuButton: {
-      position: "fixed",
-      top: 5,
-      left: 5,
-      background: theme.palette.secondary.dark,
-      opacity: 0.8,
-      color: theme.palette.secondary.contrastText,
-      "&:hover": {
-        background: theme.palette.secondary.light
-      }
-    },
-    renewButton: {
-      position: "fixed",
-      top: 5,
-      left: 65,
-      background: "blue",
-      opacity: 0.8,
-      color: "#dfdfdf",
-      transition: "ease all 300ms",
-      "&:hover": {
-        background: "lightblue",
-        color: "darkblue"
-      }
-    }
-  };
-})(ImgList);
+export default ImgList;
 
 

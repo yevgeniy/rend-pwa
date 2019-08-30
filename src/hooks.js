@@ -24,7 +24,7 @@ const Store = {
         this.runOnUpdates.push(fn)
         return {
             destroy: () => {
-                this.runOnUpdates = this.runOnUpdates.filter(v => v != fn);
+                this.runOnUpdates = this.runOnUpdates.filter(v => v !== fn);
             }
         }
     },
@@ -77,9 +77,7 @@ export function useCreateStore() {
 }
 export function useStore() {
     const state = useContext(StateContext);
-    console.log('rerun', state)
     const updateState = st => {
-        console.log('update', st)
         Store.updateState(st);
     }
 
