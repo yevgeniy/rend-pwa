@@ -10,8 +10,8 @@ import Drawer from "@material-ui/core/Drawer";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
-import { useImages, useSelectedImage } from './hooks';
-import cats from './cats';
+import { useImages, useSelectedImage } from "./hooks";
+import cats from "./cats";
 
 const useStyles = makeStyles(theme => {
   return {
@@ -65,11 +65,14 @@ const useStyles = makeStyles(theme => {
       }
     }
   };
-})
+});
 const ImgList = React.memo(({ state, db, states, setNav }) => {
   const classes = useStyles();
   let { images: imgs, updateImage, setImages } = useImages(db, state);
-  const { selectedImage: selectedImageId, setSelectedImage } = useSelectedImage();
+  const {
+    selectedImage: selectedImageId,
+    setSelectedImage
+  } = useSelectedImage();
   const [open, setOpen] = useState(false);
 
   const selectedImage = (imgs || []).find(v => v.id === selectedImageId);
@@ -113,9 +116,9 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
 
   // if (imgs)
   //   imgs.forEach((v, i) => {
-  //     v.thumb = cats[i % cats.length].thumb
-  //     v.reg = cats[i % cats.length].reg
-  //   })
+  //     v.thumb = cats[i % cats.length].thumb;
+  //     v.reg = cats[i % cats.length].reg;
+  //   });
 
   return (
     <div>
@@ -165,5 +168,3 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
 });
 
 export default ImgList;
-
-
