@@ -11,7 +11,7 @@ const useStyles = makeStyles(theme => {
       transition: "ease all 500ms"
     }
   };
-})
+}, { name: 'StatesView' })
 
 const StatesView = React.memo(({ states, setNav, db }) => {
   const classes = useStyles()

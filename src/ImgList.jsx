@@ -11,6 +11,7 @@ import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
 import { useImages, useSelectedImage } from './hooks';
+import cats from './cats';
 
 const useStyles = makeStyles(theme => {
   return {
@@ -67,7 +68,7 @@ const useStyles = makeStyles(theme => {
 })
 const ImgList = React.memo(({ state, db, states, setNav }) => {
   const classes = useStyles();
-  const { images: imgs, updateImage, setImages } = useImages(db, state);
+  let { images: imgs, updateImage, setImages } = useImages(db, state);
   const { selectedImage: selectedImageId, setSelectedImage } = useSelectedImage();
   const [open, setOpen] = useState(false);
 
@@ -109,6 +110,13 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     }
     return null;
   };
+
+  // if (imgs)
+  //   imgs.forEach((v, i) => {
+  //     v.thumb = cats[i % cats.length].thumb
+  //     v.reg = cats[i % cats.length].reg
+  //   })
+
   return (
     <div>
       <Drawer open={open} onClose={() => setOpen(false)}>

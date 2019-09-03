@@ -4,6 +4,7 @@ import {
     RemoteMongoClient,
     UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
+import { getStates, getStateImages, getMarkedImages } from './services';
 var Client = Stitch.initializeDefaultAppClient("rend-app-nczgz");
 const Mongodb = Client.getServiceClient(
     RemoteMongoClient.factory,
@@ -13,9 +14,6 @@ const Mongodb = Client.getServiceClient(
 const credential = new UserApiKeyCredential(
     "vw2VXfikom72Czi3pyUHjoMXvmjTUEEuh5aNJ6rPgAVGd2Da9u9XTHc3BFguxcBe"
 );
-
-
-export const StateContext = React.createContext();
 
 let process$ = Promise.resolve();
 const Store = {
@@ -65,24 +63,32 @@ const Store = {
 }
 Store.init();
 
-
-export function useCreateStore() {
-    const [state, setState] = useState(Store.state);
-    useEffect(() => {
-        const b = Store.subscribe(setState)
-        return () => b.destroy();
-    }, []);
-
-    return state;
+const revalImages = (state, update) => {
+    if (update.selectedState)
+        update.images = null;
 }
-export function useStore() {
-    const state = useContext(StateContext);
+const reval = (state, update) => {
+    revalImages(state, update);
+
+    return update;
+}
+
+export function useStore(extractor) {
+    const [val, setVal] = useState(Store.state ? extractor(Store.state) : null);
+
+    useEffect(() => {
+        Store.subscribe(s => {
+            s && setVal(extractor(s));
+        })
+    }, [])
+
     const updateState = st => {
-        Store.updateState(st);
+        Store.updateState(reval(Store.state, st));
     }
 
-    return { state, updateState };
+    return [val, updateState];
 }
+
 
 export function useDb() {
     const [db, setDb] = useState(null);
@@ -101,71 +107,45 @@ export function useDb() {
 
 export function useStates() {
     const db = useDb();
-    const { state, updateState } = useStore();
+    const [states, updateState] = useStore(({ states }) => {
+        if (states && states.constructor === Array)
+            return states;
+        return null;
+    });
     useEffect(() => {
         if (!db) return;
         getStates(db)
-            .then(data => updateState({ states: { created: +new Date(), data } }))
+            .then(states => updateState({ states }))
             .catch(e => console.log(e));
     }, [db]);
 
-    const { states: { data, created } = {} } = state || {};
-    if (created && time(created).within(3).hours()) {
-        return data;
-    }
-    return null;
+    return states;
 }
 
-async function getStates(db) {
-    var [err, res] = await new Promise(async res => {
-        var r = await db
-            .collection("images")
-            .aggregate([{ $group: { _id: "$datetime" } }])
-            .toArray()
-            .catch(e => res[(e, null)]);
-        res([
-            null,
-            r
-                .map(v => {
-                    return v._id;
-                })
-                .filter(v => v)
-        ]);
+export function useSelectedState() {
+    const [selectedState, updateState] = useStore(({ selectedState }) => {
+        if (selectedState && (selectedState.constructor === Number || selectedState.constructor === String))
+            return selectedState;
+        return null;
     });
 
-    if (err) throw err;
-    return res.sort((a, b) => (a >= b ? 1 : -1));
-}
-export function useSelectedState() {
-    const { state, updateState } = useStore();
-
-
-    let selectedState = null;
-    const { selectedState: { data, created } = {} } = state || {};
-    if (created && time(created).within(3).hours()) {
-        selectedState = data;
-    }
-    const setSelectedState = (data) => {
+    const setSelectedState = (selectedState) => {
         updateState({
-            selectedState: { data, created: +new Date() },
-            images: null
+            selectedState
         })
     }
     return { selectedState, setSelectedState };
 }
 export function useImages(db) {
-    let { state, updateState } = useStore();
+    let [images, updateState] = useStore(({ images }) => {
+        if (images && images.constructor === Array)
+            return images;
+        return null;
+    });
     const { selectedState } = useSelectedState();
 
-    let images = null;
-    state = state || {};
-    let data = (state.images || {}).data
-    let created = (state.images || {}).created;
-    if (created && time(created).within(3).hours()) {
-        images = data;
-    }
-    const setImages = data => {
-        updateState({ images: { data, created: +new Date() } })
+    const setImages = images => {
+        updateState({ images });
     }
     useEffect(() => {
         if (images) return;
@@ -189,58 +169,20 @@ export function useImages(db) {
         await db.collection("images").updateOne({ id: id }, { $set: props });
         var i = images.findIndex(v => v.id === id);
         images[i] = { ...images[i], ...props };
-        updateState({ images: { data: [...images], created: +new Date() } })
+        updateState({ images: [...images] })
     };
 
     return { images, updateImage, setImages };
 }
 export function useSelectedImage() {
-    let { state, updateState } = useStore();
+    let [selectedImage, updateState] = useStore(({ selectedImage }) => {
+        if (selectedImage && selectedImage.constructor === Number)
+            return selectedImage;
+        return null;
+    });
 
-    let selectedImage = null;
-    state = state || {};
-    let data = (state.selectedImage || {}).data;
-    let created = (state.selectedImage || {}).created;
-    if (created && time(created).within(3).hours()) {
-        selectedImage = data;
-    }
-
-    const setSelectedImage = data => {
-        updateState({ selectedImage: { data, created: +new Date() } })
+    const setSelectedImage = selectedImage => {
+        updateState({ selectedImage })
     }
     return { selectedImage, setSelectedImage };
-}
-
-async function getStateImages(db, state) {
-    let images = await db
-        .collection("images")
-        .find({ datetime: state })
-        .toArray();
-    return images;
-}
-async function getMarkedImages(db) {
-    let images = await db
-        .collection("images")
-        .aggregate([{ $match: { marked: true } }, { $sample: { size: 10 } }])
-        .toArray();
-    let drawing = await db
-        .collection("images")
-        .find({ drawing: true })
-        .toArray();
-    images.unshift(...drawing);
-    return images;
-}
-
-const Hour1 = 3.6e+6;
-function time(ti) {
-    return {
-        within: n => {
-            return {
-                hours: h => {
-                    const test = Hour1 * n;
-                    return +new Date() - ti < test
-                }
-            }
-        }
-    }
 }
