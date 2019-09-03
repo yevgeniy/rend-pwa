@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useUpdate } from "./hooks";
 import { makeStyles } from "@material-ui/core";
 import Drawer from "@material-ui/core/Drawer";
 import IconButton from "@material-ui/core/IconButton";
@@ -66,7 +67,7 @@ const useStyles = makeStyles(theme => {
       }
     }
   };
-})
+});
 
 const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
   const classes = useStyles();
@@ -97,7 +98,7 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
     let zoom = 1;
     const loaded = () => {
       instance = panzoom(document.querySelector("#panthis"), {
-        onTouch: function (e) {
+        onTouch: function(e) {
           let paths = [...e.composedPath()].map(v => v.id);
           if (paths.some(v => v === "backButton" || v === "menuButton"))
             return false;
@@ -175,10 +176,9 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
 });
 
 function useMarked(img, updateImage) {
-
   const [marked, setMarked] = useState(img.marked);
 
-  useEffect(() => {
+  useUpdate(() => {
     updateImage(img.id, { marked });
   }, [marked]);
 
@@ -187,7 +187,7 @@ function useMarked(img, updateImage) {
 function useDrawn(img, updateImage) {
   const [drawn, setDrawn] = useState(img.drawn);
 
-  useEffect(() => {
+  useUpdate(() => {
     updateImage(img.id, { drawn });
   }, [drawn]);
   return [drawn, setDrawn];
@@ -195,11 +195,10 @@ function useDrawn(img, updateImage) {
 function useDrawing(img, updateImage) {
   const [drawing, setDrawing] = useState(img.drawing);
 
-  useEffect(() => {
+  useUpdate(() => {
     updateImage(img.id, { drawing });
   }, [drawing]);
   return [drawing, setDrawing];
 }
-
 
 export default ImgView;

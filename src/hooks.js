@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useRef, useState, useEffect, useContext } from "react";
 import localforage from "localforage";
 import {
   Stitch,
@@ -167,4 +167,14 @@ export function useSelectedImage() {
     updateState({ selectedImage });
   };
   return { selectedImage, setSelectedImage };
+}
+export function useUpdate(fn, args) {
+  const f = useRef(true);
+  useEffect(() => {
+    if (f.current) {
+      f.current = false;
+      return;
+    }
+    fn();
+  }, args);
 }

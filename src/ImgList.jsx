@@ -6,6 +6,7 @@ import MenuIcon from "@material-ui/icons/Menu";
 import Renew from "@material-ui/icons/Autorenew";
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
+import BrockenImage from "@material-ui/icons/BrokenImage";
 import Drawer from "@material-ui/core/Drawer";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
@@ -31,6 +32,10 @@ const useStyles = makeStyles(theme => {
     },
     imgsContainer: {
       textAlign: "center"
+    },
+    isImgSelected: {
+      overflow: "hidden",
+      pointerEvents: "none"
     },
     imgContainer: {
       display: "inline-block",
@@ -139,12 +144,9 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
 
       <Loading test={!!imgs}>
         <div
-          className={classes.imgsContainer}
-          style={{
-            // display: selectedImage ? "none" : ""
-            overflow: selectedImage ? "hidden" : "",
-            pointerEvents: selectedImage ? "none" : ""
-          }}
+          className={classnames(classes.imgsContainer, {
+            [classes.isImgSelected]: selectedImage
+          })}
         >
           {(imgs || []).map(img => {
             return (
@@ -154,7 +156,8 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
                 onClick={() => selectImg(img)}
               >
                 {renderIconsContainer(img)}
-                <img key={img.thumb} src={img.thumb} alt="" />
+
+                <Img key={img.thumb} {...img} />
               </div>
             );
           })}
@@ -165,6 +168,10 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
       ) : null}
     </div>
   );
+});
+
+const Img = React.memo(props => {
+  return <img src={props.thumb} alt="" />;
 });
 
 export default ImgList;
