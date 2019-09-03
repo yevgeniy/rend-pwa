@@ -51,15 +51,6 @@ const Store = {
 };
 Store.init();
 
-const revalImages = update => {
-  if (update.selectedState) update.images = null;
-};
-const reval = update => {
-  revalImages(update);
-
-  return update;
-};
-
 export function useStore(extractor) {
   const [val, setVal] = useState(Store.state ? extractor(Store.state) : null);
 
@@ -70,7 +61,7 @@ export function useStore(extractor) {
   }, []);
 
   const updateState = st => {
-    Store.updateState(reval(st));
+    Store.updateState(st);
   };
 
   return [val, updateState];
@@ -126,7 +117,7 @@ export function useSelectedState() {
   return { selectedState, setSelectedState };
 }
 export function useImages(db) {
-  let [images, updateState] = useStore(({ images }) => {
+  const [images, updateState] = useStore(({ images }) => {
     if (images && images.constructor === Array) return images;
     return null;
   });
@@ -136,7 +127,11 @@ export function useImages(db) {
     updateState({ images });
   };
   useEffect(() => {
+    if (!selectedState) setImages(null);
+  }, [selectedState]);
+  useEffect(() => {
     if (images) return;
+    if (!selectedState) return;
 
     if (selectedState === "__MARKED__")
       getMarkedImages(db)
