@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
 import IconButton from "@material-ui/core/IconButton";
@@ -7,6 +7,7 @@ import Renew from "@material-ui/icons/Autorenew";
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
 import BrockenImage from "@material-ui/icons/BrokenImage";
+import orange from "@material-ui/core/colors/orange";
 import Drawer from "@material-ui/core/Drawer";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
@@ -50,6 +51,19 @@ const useStyles = makeStyles(
           background: "lightblue",
           color: "darkblue"
         }
+      },
+      purgeButton: {
+        position: "fixed",
+        top: 5,
+        left: 125,
+        background: orange[600],
+        opacity: 0.8,
+        color: "#dfdfdf",
+        transition: "ease all 300ms",
+        "&:hover": {
+          background: orange[400],
+          color: "white"
+        }
       }
     };
   },
@@ -57,6 +71,7 @@ const useStyles = makeStyles(
 );
 const ImgList = React.memo(({ state, db, states, setNav }) => {
   const classes = useStyles();
+  const brokenLinksRef = useRef(new Set());
   let { images: imgs, updateImage, setImages } = useImages(db, state);
   const {
     selectedImage: selectedImageId,
@@ -66,12 +81,15 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
 
   const selectedImage = (imgs || []).find(v => v.id === selectedImageId);
 
-  const openDrawer = () => {
+  const doOpenDrawer = () => {
     setOpen(true);
   };
   const doSelectImage = useCallback(img => {
     setSelectedImage(img.id);
   }, []);
+  const doPurge = () => {
+    console.log(Array.from(brokenLinksRef.current));
+  };
 
   // if (imgs)
   //   imgs.forEach((v, i) => {
@@ -84,7 +102,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
       <Drawer open={open} onClose={() => setOpen(false)}>
         <StatesView db={db} states={states} setNav={setNav} />
       </Drawer>
-      <IconButton className={classes.menuButton} onClick={openDrawer}>
+      <IconButton className={classes.menuButton} onClick={doOpenDrawer}>
         <MenuIcon />
       </IconButton>
       {state === "__MARKED__" ? (
@@ -95,6 +113,9 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
           <Renew />
         </IconButton>
       ) : null}
+      <IconButton className={classes.purgeButton} onClick={doPurge}>
+        <BrockenImage />
+      </IconButton>
 
       <Loading test={!!imgs}>
         <div
@@ -103,7 +124,14 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
           })}
         >
           {(imgs || []).map(img => {
-            return <Img key={img.id} doSelectImage={doSelectImage} {...img} />;
+            return (
+              <Img
+                key={img.id}
+                doSelectImage={doSelectImage}
+                brokenLinksRef={brokenLinksRef}
+                {...img}
+              />
+            );
           })}
         </div>
       </Loading>
@@ -175,17 +203,33 @@ const useImgStyles = makeStyles(
         "& img": {
           maxWidth: "100%"
         }
+      },
+      brokenImg: {
+        width: "100%",
+        height: 200,
+        color: "#efefef",
+        background: "gray"
       }
     };
   },
   { name: "Img" }
 );
-const Img = React.memo(({ doSelectImage, ...img }) => {
+const Img = React.memo(({ doSelectImage, brokenLinksRef, ...img }) => {
   const classes = useImgStyles();
+  const [isBroken, setIsBroken] = useState(false);
+
+  useEffect(() => {
+    setIsBroken(false);
+  }, [img.thumb]);
+
   return (
     <div className={classes.root} onClick={() => doSelectImage(img)}>
       <IconsContainer {...img} />
-      <img src={img.thumb} alt="" />;
+      {isBroken ? (
+        <BrockenImage className={classes.brokenImg} />
+      ) : (
+        <img src={img.thumb} onError={() => setIsBroken(true)} alt="" />
+      )}
     </div>
   );
 });
