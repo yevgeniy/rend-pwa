@@ -73,11 +73,11 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     setSelectedImage(img.id);
   };
 
-  if (imgs)
-    imgs.forEach((v, i) => {
-      v.thumb = cats[i % cats.length].thumb;
-      v.reg = cats[i % cats.length].reg;
-    });
+  // if (imgs)
+  //   imgs.forEach((v, i) => {
+  //     v.thumb = cats[i % cats.length].thumb;
+  //     v.reg = cats[i % cats.length].reg;
+  //   });
 
   return (
     <div>
