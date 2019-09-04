@@ -91,7 +91,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     console.log(Array.from(brokenLinksRef.current));
   };
 
-  if (location.href.match("localhost"))
+  if (window.location.href.match("localhost"))
     if (imgs)
       imgs.forEach((v, i) => {
         v.thumb = cats[i % cats.length].thumb;
