@@ -96,6 +96,7 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
   useEffect(() => {
     let instance;
     let zoom = 1;
+    let t;
     const loaded = () => {
       instance = panzoom(document.querySelector("#panthis"), {
         onTouch: function(e) {
@@ -109,7 +110,7 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
       });
       const origWidth = imgRef.current.getBoundingClientRect().width;
       const work = e => {
-        setTimeout(() => {
+        t = setTimeout(() => {
           zoom = imgRef.current.getBoundingClientRect().width / origWidth;
           setZoom(zoom);
           if (1.05 > zoom && zoom >= 1) e.moveTo(0, 0);
@@ -120,6 +121,7 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
     };
     imgRef.current.addEventListener("load", loaded);
     return () => {
+      clearTimeout(t);
       imgRef.current.removeEventListener("load", loaded);
       instance && instance.dispose();
     };
