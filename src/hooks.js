@@ -178,3 +178,18 @@ export function useUpdate(fn, args) {
     fn();
   }, args);
 }
+export const useImageSrc = img => {
+  const [src, setSrc] = useState(null);
+  const [isError, setIsError] = useState(false);
+
+  useEffect(() => {
+    setSrc(img.thumb);
+  }, [img.id]);
+
+  const didError = () => {
+    if (src === img.thumb) setSrc(img.reg);
+    else if (src === img.reg) setSrc(img.large);
+    else if (src === img.large) setIsError(true);
+  };
+  return { src, isError, didError };
+};

@@ -12,8 +12,9 @@ import Drawer from "@material-ui/core/Drawer";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
-import { useImages, useSelectedImage } from "./hooks";
+import { useImages, useSelectedImage, useImageSrc } from "./hooks";
 import cats from "./cats";
+import { StitchClientError } from "mongodb-stitch-core-sdk";
 
 const useStyles = makeStyles(
   theme => {
@@ -91,6 +92,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     console.log(Array.from(brokenLinksRef.current));
   };
 
+  /* show safe cats :D */
   if (window.location.href.match("localhost"))
     if (imgs)
       imgs.forEach((v, i) => {
@@ -217,19 +219,20 @@ const useImgStyles = makeStyles(
 );
 const Img = React.memo(({ doSelectImage, brokenLinksRef, ...img }) => {
   const classes = useImgStyles();
-  const [isBroken, setIsBroken] = useState(false);
+
+  const { src, isError, didError } = useImageSrc(img);
 
   useEffect(() => {
-    setIsBroken(false);
-  }, [img.thumb]);
+    brokenLinksRef.current.add(img.id);
+  }, [isError]);
 
   return (
     <div className={classes.root} onClick={() => doSelectImage(img)}>
       <IconsContainer {...img} />
-      {isBroken ? (
+      {isError ? (
         <BrockenImage className={classes.brokenImg} />
       ) : (
-        <img src={img.thumb} onError={() => setIsBroken(true)} alt="" />
+        <img src={src} onError={didError} alt="" />
       )}
     </div>
   );
