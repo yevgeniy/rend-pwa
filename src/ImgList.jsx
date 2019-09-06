@@ -73,7 +73,7 @@ const useStyles = makeStyles(
 const ImgList = React.memo(({ state, db, states, setNav }) => {
   const classes = useStyles();
   const brokenLinksRef = useRef(new Set());
-  let { images: imgs, updateImage, setImages } = useImages(db, state);
+  let { images: imgs, updateImage, setImages, deleteImage } = useImages(db, state);
   const {
     selectedImage: selectedImageId,
     setSelectedImage
@@ -89,7 +89,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     setSelectedImage(img.id);
   }, []);
   const doPurge = () => {
-    console.log(Array.from(brokenLinksRef.current));
+    Array.from(brokenLinksRef.current).forEach(deleteImage);
   };
 
   /* show safe cats :D */
@@ -223,7 +223,8 @@ const Img = React.memo(({ doSelectImage, brokenLinksRef, ...img }) => {
   const { src, isError, didError } = useImageSrc(img);
 
   useEffect(() => {
-    brokenLinksRef.current.add(img.id);
+    if (isError)
+      brokenLinksRef.current.add(img.id);
   }, [isError]);
 
   return (

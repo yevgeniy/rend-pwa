@@ -6,6 +6,7 @@ import {
   UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
 import { getStates, getStateImages, getMarkedImages } from "./services";
+import { visible } from "ansi-colors";
 var Client = Stitch.initializeDefaultAppClient("rend-app-nczgz");
 const Mongodb = Client.getServiceClient(
   RemoteMongoClient.factory,
@@ -40,8 +41,9 @@ const Store = {
     process$ = process$.then(
       () =>
         new Promise(res => {
+          st = st && st.constructor===Function ? st(this.state) : st;
           this.state = { ...this.state, ...st };
-          console.log(this.state);
+
           localforage.setItem("state-db", this.state);
           this.broadcast();
           res(this.state);
@@ -153,8 +155,17 @@ export function useImages(db) {
     images[i] = { ...images[i], ...props };
     updateState({ images: [...images] });
   };
+  const deleteImage=async(id)=> {
 
-  return { images, updateImage, setImages };
+    await db.collection('images').deleteOne({id});
+    updateState(state=> {
+      if (state && state.images)
+        return {images:state.images.filter(v=>v.id!==id)};
+      return state;
+    });
+  }
+
+  return { images, updateImage, setImages, deleteImage };
 }
 export function useSelectedImage() {
   let [selectedImage, updateState] = useStore(({ selectedImage }) => {
@@ -191,5 +202,6 @@ export const useImageSrc = img => {
     else if (src === img.reg) setSrc(img.large);
     else if (src === img.large) setIsError(true);
   };
+
   return { src, isError, didError };
 };
