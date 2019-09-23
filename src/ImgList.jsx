@@ -1,7 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
-import IconButton from "@material-ui/core/IconButton";
 import MenuIcon from "@material-ui/icons/Menu";
 import Renew from "@material-ui/icons/Autorenew";
 import Done from "@material-ui/icons/Done";
@@ -9,6 +8,7 @@ import Create from "@material-ui/icons/Create";
 import BrockenImage from "@material-ui/icons/BrokenImage";
 import orange from "@material-ui/core/colors/orange";
 import Drawer from "@material-ui/core/Drawer";
+import { AppBar, Toolbar, IconButton } from "@material-ui/core";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
@@ -29,42 +29,8 @@ const useStyles = makeStyles(
         pointerEvents: "none"
       },
 
-      menuButton: {
-        position: "fixed",
-        top: 5,
-        left: 5,
-        background: theme.palette.secondary.dark,
-        opacity: 0.8,
-        color: theme.palette.secondary.contrastText,
-        "&:hover": {
-          background: theme.palette.secondary.light
-        }
-      },
-      renewButton: {
-        position: "fixed",
-        top: 5,
-        left: 65,
-        background: "blue",
-        opacity: 0.8,
-        color: "#dfdfdf",
-        transition: "ease all 300ms",
-        "&:hover": {
-          background: "lightblue",
-          color: "darkblue"
-        }
-      },
-      purgeButton: {
-        position: "fixed",
-        top: 5,
-        left: 125,
-        background: orange[600],
-        opacity: 0.8,
-        color: "#dfdfdf",
-        transition: "ease all 300ms",
-        "&:hover": {
-          background: orange[400],
-          color: "white"
-        }
+      toolButton: {
+        marginRight: theme.spacing(1)
       }
     };
   },
@@ -73,7 +39,10 @@ const useStyles = makeStyles(
 const ImgList = React.memo(({ state, db, states, setNav }) => {
   const classes = useStyles();
   const brokenLinksRef = useRef(new Set());
-  let { images: imgs, updateImage, setImages, deleteImage } = useImages(db, state);
+  let { images: imgs, updateImage, setImages, deleteImage } = useImages(
+    db,
+    state
+  );
   const {
     selectedImage: selectedImageId,
     setSelectedImage
@@ -102,23 +71,36 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
 
   return (
     <div>
-      <Drawer open={open} onClose={() => setOpen(false)}>
-        <StatesView db={db} states={states} setNav={setNav} />
-      </Drawer>
-      <IconButton className={classes.menuButton} onClick={doOpenDrawer}>
-        <MenuIcon />
-      </IconButton>
-      {state === "__MARKED__" ? (
-        <IconButton
-          className={classes.renewButton}
-          onClick={() => setImages(null)}
-        >
-          <Renew />
-        </IconButton>
-      ) : null}
-      <IconButton className={classes.purgeButton} onClick={doPurge}>
-        <BrockenImage />
-      </IconButton>
+      <AppBar position="static">
+        <Toolbar>
+          <IconButton
+            edge="start"
+            className={classes.toolButton}
+            color="inherit"
+            onClick={doOpenDrawer}
+          >
+            <MenuIcon />
+          </IconButton>
+          {state === "__MARKED__" ? (
+            <IconButton
+              edge="start"
+              color="inherit"
+              className={classes.toolButton}
+              onClick={() => setImages(null)}
+            >
+              <Renew />
+            </IconButton>
+          ) : null}
+          <IconButton
+            edge="start"
+            color="inherit"
+            className={classes.toolButton}
+            onClick={doPurge}
+          >
+            <BrockenImage />
+          </IconButton>
+        </Toolbar>
+      </AppBar>
 
       <Loading test={!!imgs}>
         <div
@@ -141,6 +123,9 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
       {selectedImage ? (
         <ImgView {...{ img: selectedImage, updateImage, setSelectedImage }} />
       ) : null}
+      <Drawer open={open} onClose={() => setOpen(false)}>
+        <StatesView db={db} states={states} setNav={setNav} />
+      </Drawer>
     </div>
   );
 });
@@ -223,8 +208,7 @@ const Img = React.memo(({ doSelectImage, brokenLinksRef, ...img }) => {
   const { src, isError, didError } = useImageSrc(img);
 
   useEffect(() => {
-    if (isError)
-      brokenLinksRef.current.add(img.id);
+    if (isError) brokenLinksRef.current.add(img.id);
   }, [isError]);
 
   return (
