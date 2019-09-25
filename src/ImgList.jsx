@@ -111,8 +111,9 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
             className={classes.toolButton}
             edge="start"
             color="inherit"
+            onClick={() => setPage(currentPage + 1)}
           >
-            {currentPage} / {totalPages}
+            {currentPage + 1} / {totalPages}
             <NavigateNext />
           </IconButton>
           <IconButton className={classes.toolButton} edge="end">

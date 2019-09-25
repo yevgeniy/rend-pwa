@@ -156,6 +156,7 @@ function useImageIds(db) {
 }
 function usePages(db) {
   const { imageIds, deleteImage } = useImageIds(db);
+  const { selectedState } = useSelectedState();
 
   const [currentPage, updateState_currentPage] = useStore(
     ({ currentPage }) => currentPage || 0
@@ -168,6 +169,11 @@ function usePages(db) {
   );
   const [idsForPage, setIdsForPage] = useState(null);
 
+  useUpdate(() => {
+    if (!selectedState) return;
+    console.log("RESETTING", selectedState);
+    updateState_currentPage({ currentPage: 0 });
+  }, [selectedState]);
   useEffect(() => {
     if (!imageIds) {
       return;
@@ -185,16 +191,22 @@ function usePages(db) {
       setIdsForPage(null);
       return;
     }
+    console.log("a", currentPage);
     const pi = imageIds.slice(currentPage * pageSize).slice(0, pageSize);
     setIdsForPage(pi);
   }, [pageSize, totalPages, currentPage, imageIds]);
+
+  const setPage = p => {
+    updateState_currentPage({ currentPage: p });
+  };
 
   return {
     imageIds: idsForPage,
     currentPage,
     totalPages,
     pageSize,
-    deleteImage
+    deleteImage,
+    setPage
   };
 }
 export function useImages(db) {
@@ -203,9 +215,14 @@ export function useImages(db) {
     return null;
   });
   const { selectedState } = useSelectedState();
-  const { imageIds, currentPage, totalPages, pageSize, deleteImage } = usePages(
-    db
-  );
+  const {
+    imageIds,
+    currentPage,
+    totalPages,
+    pageSize,
+    deleteImage,
+    setPage
+  } = usePages(db);
 
   const setImages = images => {
     updateState({ images });
@@ -237,7 +254,8 @@ export function useImages(db) {
     deleteImage,
     totalPages,
     currentPage,
-    pageSize
+    pageSize,
+    setPage
   };
 }
 export function useSelectedImage() {
