@@ -5,8 +5,12 @@ import {
   RemoteMongoClient,
   UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
-import { getStates, getStateImages, getMarkedImages } from "./services";
-import { visible } from "ansi-colors";
+import {
+  getStates,
+  getStateImageIds,
+  getMarkedImageIds,
+  getImagesByIds
+} from "./services";
 var Client = Stitch.initializeDefaultAppClient("rend-app-nczgz");
 const Mongodb = Client.getServiceClient(
   RemoteMongoClient.factory,
@@ -41,7 +45,7 @@ const Store = {
     process$ = process$.then(
       () =>
         new Promise(res => {
-          st = st && st.constructor===Function ? st(this.state) : st;
+          st = st && st.constructor === Function ? st(this.state) : st;
           this.state = { ...this.state, ...st };
 
           localforage.setItem("state-db", this.state);
@@ -118,12 +122,90 @@ export function useSelectedState() {
   };
   return { selectedState, setSelectedState };
 }
+function useImageIds(db) {
+  const { selectedState } = useSelectedState();
+  const [imageIds, setImageIds] = useState(null);
+
+  useEffect(() => {
+    if (!selectedState) {
+      setImageIds(null);
+      return;
+    }
+    if (selectedState === "__MARKED__")
+      getMarkedImageIds(db)
+        .then(({ imageIds, drawingIds }) => {
+          setImageIds(Array.from(new Set([...drawingIds, ...imageIds])));
+        })
+        .catch(err => {
+          throw err;
+        });
+    else
+      getStateImageIds(db, selectedState)
+        .then(images => setImageIds(images))
+        .catch(err => {
+          throw err;
+        });
+  }, [selectedState, db]);
+
+  const deleteImage = async id => {
+    await db.collection("images").deleteOne({ id });
+    setImageIds(imageIds.filter(v => v !== id));
+  };
+
+  return { imageIds, deleteImage };
+}
+function usePages(db) {
+  const { imageIds, deleteImage } = useImageIds(db);
+
+  const [currentPage, updateState_currentPage] = useStore(
+    ({ currentPage }) => currentPage || 0
+  );
+  const [totalPages, updateState_totalPages] = useStore(
+    ({ totalPages }) => totalPages
+  );
+  const [pageSize, updateState_pageSize] = useStore(
+    ({ pageSize }) => pageSize || 20
+  );
+  const [idsForPage, setIdsForPage] = useState(null);
+
+  useEffect(() => {
+    if (!imageIds) {
+      return;
+    }
+    const tlen = (imageIds || []).length;
+    const ps = Math.max(1, Math.min(pageSize, 1000));
+    const tp = Math.ceil(tlen / ps);
+
+    updateState_totalPages({ totalPages: tp });
+    updateState_currentPage({ currentPage: Math.min(tp - 1, currentPage) });
+  }, [imageIds && imageIds.length]);
+
+  useEffect(() => {
+    if (!imageIds) {
+      setIdsForPage(null);
+      return;
+    }
+    const pi = imageIds.slice(currentPage * pageSize).slice(0, pageSize);
+    setIdsForPage(pi);
+  }, [pageSize, totalPages, currentPage, imageIds]);
+
+  return {
+    imageIds: idsForPage,
+    currentPage,
+    totalPages,
+    pageSize,
+    deleteImage
+  };
+}
 export function useImages(db) {
   const [images, updateState] = useStore(({ images }) => {
     if (images && images.constructor === Array) return images;
     return null;
   });
   const { selectedState } = useSelectedState();
+  const { imageIds, currentPage, totalPages, pageSize, deleteImage } = usePages(
+    db
+  );
 
   const setImages = images => {
     updateState({ images });
@@ -132,22 +214,14 @@ export function useImages(db) {
     if (!selectedState) setImages(null);
   }, [selectedState]);
   useEffect(() => {
-    if (images) return;
-    if (!selectedState) return;
+    if (!imageIds) return;
 
-    if (selectedState === "__MARKED__")
-      getMarkedImages(db)
-        .then(res => setImages(res))
-        .catch(err => {
-          throw err;
-        });
-    else
-      getStateImages(db, selectedState)
-        .then(res => setImages(res))
-        .catch(err => {
-          throw err;
-        });
-  }, [db, selectedState, images]);
+    getImagesByIds(db, imageIds)
+      .then(res => setImages(res))
+      .catch(err => {
+        throw err;
+      });
+  }, [db, imageIds]);
 
   const updateImage = async (id, props) => {
     await db.collection("images").updateOne({ id: id }, { $set: props });
@@ -155,17 +229,16 @@ export function useImages(db) {
     images[i] = { ...images[i], ...props };
     updateState({ images: [...images] });
   };
-  const deleteImage=async(id)=> {
 
-    await db.collection('images').deleteOne({id});
-    updateState(state=> {
-      if (state && state.images)
-        return {images:state.images.filter(v=>v.id!==id)};
-      return state;
-    });
-  }
-
-  return { images, updateImage, setImages, deleteImage };
+  return {
+    images,
+    updateImage,
+    setImages,
+    deleteImage,
+    totalPages,
+    currentPage,
+    pageSize
+  };
 }
 export function useSelectedImage() {
   let [selectedImage, updateState] = useStore(({ selectedImage }) => {

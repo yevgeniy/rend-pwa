@@ -26,6 +26,14 @@ export async function getStateImages(db, state) {
     .toArray();
   return images;
 }
+export async function getStateImageIds(db, state) {
+  const imageIds = await db
+    .collection("images")
+    .aggregate([{ $match: { datetime: state } }, { $group: { _id: "$id" } }])
+    .toArray();
+  return imageIds;
+}
+
 export async function getMarkedImages(db) {
   let images = await db
     .collection("images")
@@ -37,11 +45,27 @@ export async function getMarkedImages(db) {
     .toArray();
   images.unshift(...drawing);
 
-  //   let f = await db
-  //     .collection("images")
-  //     .aggregate([{ $match: { marked: true } }, { $group: { _id: "$id" } }])
-  //     .toArray();
-  //   console.log(f);
+  return images;
+}
+export async function getMarkedImageIds(db) {
+  let imageIds = await db
+    .collection("images")
+    .aggregate([{ $match: { marked: true } }, { $group: { _id: "$id" } }])
+    .toArray()
+    .then(res => res.map(v => v._id));
+  let drawingIds = await db
+    .collection("images")
+    .aggregate([{ $match: { drawing: true } }, { $group: { _id: "$id" } }])
+    .toArray()
+    .then(res => res.map(v => v._id));
 
+  return { imageIds, drawingIds };
+}
+export async function getImagesByIds(db, imageIds) {
+  console.log(imageIds);
+  const images = await db
+    .collection("images")
+    .find({ id: { $in: imageIds } })
+    .toArray();
   return images;
 }

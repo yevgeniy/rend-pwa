@@ -2,11 +2,12 @@ import React, { useRef, useState, useCallback, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import classnames from "classnames";
 import MenuIcon from "@material-ui/icons/Menu";
+import NavigateNext from "@material-ui/icons/NavigateNext";
+import NavigateBefore from "@material-ui/icons/NavigateBefore";
 import Renew from "@material-ui/icons/Autorenew";
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
 import BrockenImage from "@material-ui/icons/BrokenImage";
-import orange from "@material-ui/core/colors/orange";
 import Drawer from "@material-ui/core/Drawer";
 import { AppBar, Toolbar, IconButton } from "@material-ui/core";
 import Loading from "./Loading";
@@ -30,7 +31,9 @@ const useStyles = makeStyles(
       },
 
       toolButton: {
-        marginRight: theme.spacing(1)
+        marginRight: theme.spacing(1),
+        fontSize: 12,
+        color: theme.palette.common.white
       }
     };
   },
@@ -39,10 +42,15 @@ const useStyles = makeStyles(
 const ImgList = React.memo(({ state, db, states, setNav }) => {
   const classes = useStyles();
   const brokenLinksRef = useRef(new Set());
-  let { images: imgs, updateImage, setImages, deleteImage } = useImages(
-    db,
-    state
-  );
+  let {
+    images: imgs,
+    updateImage,
+    setImages,
+    deleteImage,
+    totalPages,
+    currentPage,
+    setPage
+  } = useImages(db, state);
   const {
     selectedImage: selectedImageId,
     setSelectedImage
@@ -98,6 +106,10 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
             onClick={doPurge}
           >
             <BrockenImage />
+          </IconButton>
+          <IconButton className={classes.toolButton}>
+            {currentPage} / {totalPages}
+            <NavigateNext />
           </IconButton>
         </Toolbar>
       </AppBar>
