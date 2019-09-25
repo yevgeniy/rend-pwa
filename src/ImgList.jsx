@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import classnames from "classnames";
+import clsx from "classnames";
 import MenuIcon from "@material-ui/icons/Menu";
 import NavigateNext from "@material-ui/icons/NavigateNext";
 import NavigateBefore from "@material-ui/icons/NavigateBefore";
@@ -23,7 +23,14 @@ const useStyles = makeStyles(
   theme => {
     return {
       root: {},
-
+      appBar: {
+        transition: "all ease 500ms",
+        opacity: 1
+      },
+      hidden: {
+        opacity: 0,
+        pointerEvents: "none"
+      },
       imgsContainer: {
         textAlign: "center",
         marginTop: theme.spacing(8)
@@ -74,6 +81,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
   }, []);
   const doPurge = () => {
     Array.from(brokenLinksRef.current).forEach(deleteImage);
+    brokenLinksRef.current = new Set();
   };
 
   // /* show safe cats :D */
@@ -86,7 +94,12 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
 
   return (
     <div>
-      <AppBar position="fixed">
+      <AppBar
+        position="fixed"
+        className={clsx(classes.appBar, {
+          [classes.hidden]: !!selectedImage
+        })}
+      >
         <Toolbar>
           <IconButton
             edge="start"
@@ -135,7 +148,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
 
       <Loading test={!!imgs}>
         <div
-          className={classnames(classes.imgsContainer, {
+          className={clsx(classes.imgsContainer, {
             [classes.isImgSelected]: selectedImage
           })}
         >
@@ -163,19 +176,31 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
         anchor="top"
       >
         <Toolbar>
-          <IconButton className={classes.functionButton}>
+          <IconButton
+            className={classes.functionButton}
+            onClick={() => setPage(0)}
+          >
             <FirstPage />
           </IconButton>
-          <IconButton className={classes.functionButton}>
+          <IconButton
+            className={classes.functionButton}
+            onClick={() => setPage(Math.max(0, currentPage - 1))}
+          >
             <NavigateBefore />
           </IconButton>
           <Typography color="primary">
             {currentPage + 1} / {totalPages}
           </Typography>
-          <IconButton className={classes.functionButton}>
+          <IconButton
+            className={classes.functionButton}
+            onClick={() => setPage(Math.min(currentPage + 1, totalPages - 1))}
+          >
             <NavigateNext />
           </IconButton>
-          <IconButton className={classes.functionButton}>
+          <IconButton
+            className={classes.functionButton}
+            onClick={() => setPage(totalPages - 1)}
+          >
             <LastPage />
           </IconButton>
         </Toolbar>
@@ -211,20 +236,20 @@ const IconsContainer = React.memo(img => {
   if (img.marked || img.drawing || img.drawn) {
     return (
       <div
-        className={classnames(classes.root, {
+        className={clsx(classes.root, {
           [classes.drawingIconsContainer]: img.drawing
         })}
       >
         {img.marked ? (
           <Done
-            className={classnames(classes.icon, {
+            className={clsx(classes.icon, {
               [classes.drawingIcon]: img.drawing
             })}
           />
         ) : null}
         {img.drawn ? (
           <Create
-            className={classnames(classes.icon, {
+            className={clsx(classes.icon, {
               [classes.drawingIcon]: img.drawing
             })}
           />
