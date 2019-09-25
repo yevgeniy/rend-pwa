@@ -4,13 +4,15 @@ import classnames from "classnames";
 import MenuIcon from "@material-ui/icons/Menu";
 import NavigateNext from "@material-ui/icons/NavigateNext";
 import NavigateBefore from "@material-ui/icons/NavigateBefore";
+import LastPage from "@material-ui/icons/LastPage";
+import FirstPage from "@material-ui/icons/FirstPage";
 import More from "@material-ui/icons/More";
 import Renew from "@material-ui/icons/Autorenew";
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
 import BrockenImage from "@material-ui/icons/BrokenImage";
 import Drawer from "@material-ui/core/Drawer";
-import { AppBar, Toolbar, IconButton } from "@material-ui/core";
+import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
@@ -23,7 +25,8 @@ const useStyles = makeStyles(
       root: {},
 
       imgsContainer: {
-        textAlign: "center"
+        textAlign: "center",
+        marginTop: theme.spacing(8)
       },
       isImgSelected: {
         overflow: "hidden",
@@ -34,6 +37,9 @@ const useStyles = makeStyles(
         marginRight: theme.spacing(1),
         fontSize: 12,
         color: theme.palette.common.white
+      },
+      functionButton: {
+        color: theme.palette.primary.dark
       }
     };
   },
@@ -56,6 +62,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     setSelectedImage
   } = useSelectedImage();
   const [open, setOpen] = useState(false);
+  const [isFunctionsOpen, setIsFunctionOpen] = useState(false);
 
   const selectedImage = (imgs || []).find(v => v.id === selectedImageId);
 
@@ -79,7 +86,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
 
   return (
     <div>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Toolbar>
           <IconButton
             edge="start"
@@ -116,7 +123,11 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
             {currentPage + 1} / {totalPages}
             <NavigateNext />
           </IconButton>
-          <IconButton className={classes.toolButton} edge="end">
+          <IconButton
+            className={classes.toolButton}
+            edge="end"
+            onClick={() => setIsFunctionOpen(true)}
+          >
             <More />
           </IconButton>
         </Toolbar>
@@ -145,6 +156,29 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
       ) : null}
       <Drawer open={open} onClose={() => setOpen(false)}>
         <StatesView db={db} states={states} setNav={setNav} />
+      </Drawer>
+      <Drawer
+        open={isFunctionsOpen}
+        onClose={() => setIsFunctionOpen(false)}
+        anchor="top"
+      >
+        <Toolbar>
+          <IconButton className={classes.functionButton}>
+            <FirstPage />
+          </IconButton>
+          <IconButton className={classes.functionButton}>
+            <NavigateBefore />
+          </IconButton>
+          <Typography color="primary">
+            {currentPage + 1} / {totalPages}
+          </Typography>
+          <IconButton className={classes.functionButton}>
+            <NavigateNext />
+          </IconButton>
+          <IconButton className={classes.functionButton}>
+            <LastPage />
+          </IconButton>
+        </Toolbar>
       </Drawer>
     </div>
   );
