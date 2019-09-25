@@ -241,7 +241,7 @@ export function useImages(db) {
     if (!imageIds) return;
 
     getImagesByIds(db, imageIds)
-      .then(res => setImages(res))
+      .then(res => setImages(imageIds.map(v => res.find(vv => vv.id == v))))
       .catch(err => {
         throw err;
       });
