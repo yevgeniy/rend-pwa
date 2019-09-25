@@ -16,7 +16,6 @@ import StatesView from "./StatesView";
 import ImgView from "./ImgView";
 import { useImages, useSelectedImage, useImageSrc } from "./hooks";
 import cats from "./cats";
-import { StitchClientError } from "mongodb-stitch-core-sdk";
 
 const useStyles = makeStyles(
   theme => {
@@ -116,7 +115,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
             {currentPage} / {totalPages}
             <NavigateNext />
           </IconButton>
-          <IconButton className={classes.toolButton}>
+          <IconButton className={classes.toolButton} edge="end">
             <More />
           </IconButton>
         </Toolbar>
