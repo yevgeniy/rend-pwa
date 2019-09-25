@@ -4,6 +4,7 @@ import classnames from "classnames";
 import MenuIcon from "@material-ui/icons/Menu";
 import NavigateNext from "@material-ui/icons/NavigateNext";
 import NavigateBefore from "@material-ui/icons/NavigateBefore";
+import More from "@material-ui/icons/More";
 import Renew from "@material-ui/icons/Autorenew";
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
@@ -107,9 +108,16 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
           >
             <BrockenImage />
           </IconButton>
-          <IconButton className={classes.toolButton}>
+          <IconButton
+            className={classes.toolButton}
+            edge="start"
+            color="inherit"
+          >
             {currentPage} / {totalPages}
             <NavigateNext />
+          </IconButton>
+          <IconButton className={classes.toolButton}>
+            <More />
           </IconButton>
         </Toolbar>
       </AppBar>
