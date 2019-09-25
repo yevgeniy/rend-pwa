@@ -122,6 +122,13 @@ export function useSelectedState() {
   };
   return { selectedState, setSelectedState };
 }
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 function useImageIds(db) {
   const { selectedState } = useSelectedState();
   const [imageIds, setImageIds] = useState(null);
@@ -134,7 +141,9 @@ function useImageIds(db) {
     if (selectedState === "__MARKED__")
       getMarkedImageIds(db)
         .then(({ imageIds, drawingIds }) => {
-          setImageIds(Array.from(new Set([...drawingIds, ...imageIds])));
+          setImageIds(
+            Array.from(new Set([...drawingIds, ...shuffle(imageIds)]))
+          );
         })
         .catch(err => {
           throw err;
