@@ -171,7 +171,6 @@ function usePages(db) {
 
   useUpdate(() => {
     if (!selectedState) return;
-    console.log("RESETTING", selectedState);
     updateState_currentPage({ currentPage: 0 });
   }, [selectedState]);
   useEffect(() => {
@@ -191,7 +190,6 @@ function usePages(db) {
       setIdsForPage(null);
       return;
     }
-    console.log("a", currentPage);
     const pi = imageIds.slice(currentPage * pageSize).slice(0, pageSize);
     setIdsForPage(pi);
   }, [pageSize, totalPages, currentPage, imageIds]);
