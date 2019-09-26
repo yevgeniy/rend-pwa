@@ -30,7 +30,8 @@ export async function getStateImageIds(db, state) {
   const imageIds = await db
     .collection("images")
     .aggregate([{ $match: { datetime: state } }, { $group: { _id: "$id" } }])
-    .toArray();
+    .toArray()
+    .then(res => res.map(v => v._id));
   return imageIds;
 }
 
