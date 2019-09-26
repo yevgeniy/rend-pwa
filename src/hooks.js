@@ -126,34 +126,40 @@ export function useSelectedState() {
 function useImageIds(db) {
   const { selectedState } = useSelectedState();
   const [imageIds, setImageIds] = useState(null);
+  const [drawingIds, setDrawingIds] = useState(null);
 
   useEffect(() => {
     if (!selectedState) {
       setImageIds(null);
+      setDrawingIds(null);
       return;
     }
     if (selectedState === "__MARKED__")
       getMarkedImageIds(db)
         .then(({ imageIds, drawingIds }) => {
-          setImageIds(Array.from(new Set([...drawingIds, ...imageIds])));
+          setDrawingIds(drawingIds);
+          setImageIds(imageIds);
         })
         .catch(err => {
           throw err;
         });
-    else
+    else {
+      setDrawingIds(null);
       getStateImageIds(db, selectedState)
         .then(images => setImageIds(images))
         .catch(err => {
           throw err;
         });
+    }
   }, [selectedState, db]);
 
   const deleteImage = async id => {
     await db.collection("images").deleteOne({ id });
-    setImageIds(imageIds.filter(v => v !== id));
+    imageIds && setImageIds(imageIds.filter(v => v !== id));
+    drawingIds && setDrawingIds(drawingIds.filter(v => v !== id));
   };
 
-  return { imageIds, deleteImage };
+  return { imageIds, drawingIds, deleteImage };
 }
 function shuffle(a, rand) {
   for (let i = a.length - 1; i > 0; i--) {
@@ -166,7 +172,7 @@ function shuffle(a, rand) {
 function useRandomImageIds(db) {
   const [rand, updateState] = useStore(s => s.rand);
   const { selectedState } = useSelectedState();
-  const { imageIds, deleteImage } = useImageIds(db);
+  const { imageIds, drawingIds, deleteImage } = useImageIds(db);
   const [imgs, setImgs] = useState(imageIds);
 
   useEffect(() => {
@@ -178,8 +184,10 @@ function useRandomImageIds(db) {
   }, [selectedState]);
   useEffect(() => {
     if (!rand || !imageIds) return;
-    setImgs(shuffle(imageIds, rand));
-  }, [rand, imageIds]);
+    let imgs = shuffle(imageIds, rand);
+    imgs = drawingIds ? [...drawingIds, ...imgs] : imgs;
+    setImgs(imgs);
+  }, [rand, imageIds, drawingIds]);
 
   return { imageIds: imgs, deleteImage };
 }
@@ -275,7 +283,7 @@ export function useImages(db) {
   };
 
   return {
-    images,
+    images: images.filter(v => !!v),
     updateImage,
     deleteImage,
     totalPages,

@@ -47,6 +47,10 @@ const useStyles = makeStyles(
       },
       functionButton: {
         color: theme.palette.primary.dark
+      },
+      moreButton: {
+        position: "absolute",
+        right: 0
       }
     };
   },
@@ -70,7 +74,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
   const [open, setOpen] = useState(false);
   const [isFunctionsOpen, setIsFunctionOpen] = useState(false);
 
-  const selectedImage = (imgs || []).find(v => v.id === selectedImageId);
+  const selectedImage = (imgs || []).find(v => v && v.id === selectedImageId);
 
   const doOpenDrawer = () => {
     setOpen(true);
@@ -125,7 +129,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
             <NavigateNext />
           </IconButton>
           <IconButton
-            className={classes.toolButton}
+            className={clsx(classes.toolButton, classes.moreButton)}
             edge="end"
             onClick={() => setIsFunctionOpen(true)}
           >
