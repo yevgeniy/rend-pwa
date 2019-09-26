@@ -3,81 +3,68 @@ import { useUpdate, useStore, useSelectedState } from "./hooks";
 import {
   getStateImageIds,
   getMarkedImageIds,
-  getImagesByIds
+  getImagesByIds,
+  shuffle
 } from "./services";
 
-function useImageIds(db) {
-  const { selectedState } = useSelectedState();
+function useImageIds(db, selectedState) {
   const [imageIds, setImageIds] = useState(null);
-  const [drawingIds, setDrawingIds] = useState(null);
+  const rand = useRand(selectedState);
 
   useEffect(() => {
-    if (!selectedState) {
+    if (!selectedState || !rand) {
       setImageIds(null);
-      setDrawingIds(null);
       return;
     }
     if (selectedState === "__MARKED__")
       getMarkedImageIds(db)
         .then(({ imageIds, drawingIds }) => {
-          setDrawingIds(drawingIds);
-          setImageIds(imageIds);
+          setImageIds(
+            Array.from(
+              new Set([...drawingIds, ...shuffle(imageIds, rand)])
+            ).filter(v => !!v)
+          );
         })
         .catch(err => {
           throw err;
         });
-    else {
-      setDrawingIds(null);
+    else
       getStateImageIds(db, selectedState)
-        .then(images => setImageIds(images))
+        .then(images => setImageIds(images.filter(v => !!v)))
         .catch(err => {
           throw err;
         });
-    }
   }, [selectedState, db]);
 
   const deleteImage = async id => {
     await db.collection("images").deleteOne({ id });
     imageIds && setImageIds(imageIds.filter(v => v !== id));
-    drawingIds && setDrawingIds(drawingIds.filter(v => v !== id));
   };
 
-  return { imageIds, drawingIds, deleteImage };
+  return { imageIds, deleteImage };
 }
-function shuffle(a, rand) {
-  for (let i = a.length - 1; i > 0; i--) {
-    let r = rand[i] % rand.length;
-    const j = Math.floor(r * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-function useRandomImageIds(db) {
+
+function useRand(selectedState) {
   const [rand, updateState] = useStore(s => s.rand);
-  const { selectedState } = useSelectedState();
-  const { imageIds, drawingIds, deleteImage } = useImageIds(db);
-  const [imgs, setImgs] = useState(imageIds);
 
   useEffect(() => {
     if (rand) return;
-    updateState({ rand: new Array(10).fill(0, 0, 10).map(v => Math.random()) });
+    if (selectedState)
+      updateState({
+        rand: new Array(10).fill(0, 0, 10).map(v => Math.random())
+      });
   }, []);
   useUpdate(() => {
-    updateState({ rand: new Array(10).fill(0, 0, 10).map(v => Math.random()) });
+    updateState({
+      rand: !selectedState
+        ? null
+        : new Array(10).fill(0, 0, 10).map(v => Math.random())
+    });
   }, [selectedState]);
-  useEffect(() => {
-    if (!rand || !imageIds) return;
-    let imgs = shuffle(imageIds, rand);
-    imgs = drawingIds ? [...drawingIds, ...imgs] : imgs;
-    setImgs(imgs);
-  }, [rand, imageIds, drawingIds]);
 
-  return { imageIds: imgs, deleteImage };
+  return rand;
 }
-function usePages(db) {
-  const { imageIds, deleteImage } = useRandomImageIds(db);
-  const { selectedState } = useSelectedState();
-
+function usePages(imageIds, selectedState) {
   const [currentPage, updateState_currentPage] = useStore(
     ({ currentPage }) => currentPage || 0
   );
@@ -123,36 +110,24 @@ function usePages(db) {
     currentPage,
     totalPages,
     pageSize,
-    deleteImage,
     setPage
   };
 }
-export function useImages(db) {
+function useImages(imageIds, db, selectedState) {
   const [images, updateState] = useStore(({ images }) => {
     if (images && images.constructor === Array) return images;
     return null;
   });
-  const { selectedState } = useSelectedState();
-  const {
-    imageIds,
-    currentPage,
-    totalPages,
-    pageSize,
-    deleteImage,
-    setPage
-  } = usePages(db);
 
-  const setImages = images => {
-    updateState({ images });
-  };
   useEffect(() => {
-    if (!selectedState) setImages(null);
+    if (!selectedState) updateState({ images: null });
   }, [selectedState]);
+
   useEffect(() => {
     if (!imageIds) return;
 
     getImagesByIds(db, imageIds)
-      .then(res => setImages(imageIds.map(v => res.find(vv => vv.id == v))))
+      .then(res => updateState({ images: res }))
       .catch(err => {
         throw err;
       });
@@ -165,8 +140,22 @@ export function useImages(db) {
     updateState({ images: [...images] });
   };
 
+  return { images, updateImage };
+}
+export function useImagesSystem(db) {
+  const { selectedState } = useSelectedState();
+  const { imageIds: allimageids, deleteImage } = useImageIds(db, selectedState);
+  const {
+    imageIds: pageimageids,
+    currentPage,
+    totalPages,
+    pageSize,
+    setPage
+  } = usePages(allimageids, selectedState);
+  const { images, updateImage } = useImages(pageimageids, db, selectedState);
+
   return {
-    images: images.filter(v => !!v),
+    images,
     updateImage,
     deleteImage,
     totalPages,

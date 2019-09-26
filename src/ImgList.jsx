@@ -16,7 +16,7 @@ import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
-import { useImages, useSelectedImage, useImageSrc } from "./hooksImages";
+import { useImagesSystem, useSelectedImage, useImageSrc } from "./hooksImages";
 import cats from "./cats";
 
 const useStyles = makeStyles(
@@ -66,7 +66,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     totalPages,
     currentPage,
     setPage
-  } = useImages(db, state);
+  } = useImagesSystem(db, state);
   const {
     selectedImage: selectedImageId,
     setSelectedImage
