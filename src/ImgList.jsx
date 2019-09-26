@@ -16,7 +16,7 @@ import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
 import Loading from "./Loading";
 import StatesView from "./StatesView";
 import ImgView from "./ImgView";
-import { useImages, useSelectedImage, useImageSrc } from "./hooks";
+import { useImages, useSelectedImage, useImageSrc } from "./hooksImages";
 import cats from "./cats";
 
 const useStyles = makeStyles(
