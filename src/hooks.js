@@ -122,13 +122,7 @@ export function useSelectedState() {
   };
   return { selectedState, setSelectedState };
 }
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+
 function useImageIds(db) {
   const { selectedState } = useSelectedState();
   const [imageIds, setImageIds] = useState(null);
@@ -141,9 +135,7 @@ function useImageIds(db) {
     if (selectedState === "__MARKED__")
       getMarkedImageIds(db)
         .then(({ imageIds, drawingIds }) => {
-          setImageIds(
-            Array.from(new Set([...drawingIds, ...shuffle(imageIds)]))
-          );
+          setImageIds(Array.from(new Set([...drawingIds, ...imageIds])));
         })
         .catch(err => {
           throw err;
@@ -163,8 +155,36 @@ function useImageIds(db) {
 
   return { imageIds, deleteImage };
 }
-function usePages(db) {
+function shuffle(a, rand) {
+  for (let i = a.length - 1; i > 0; i--) {
+    let r = rand[i] % rand.length;
+    const j = Math.floor(r * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+function useRandomImageIds(db) {
+  const [rand, updateState] = useStore(s => s.rand);
+  const { selectedState } = useSelectedState();
   const { imageIds, deleteImage } = useImageIds(db);
+  const [imgs, setImgs] = useState(imageIds);
+
+  useEffect(() => {
+    if (rand) return;
+    updateState({ rand: new Array(10).fill(0, 0, 10).map(v => Math.random()) });
+  }, []);
+  useUpdate(() => {
+    updateState({ rand: new Array(10).fill(0, 0, 10).map(v => Math.random()) });
+  }, [selectedState]);
+  useEffect(() => {
+    if (!rand || !imageIds) return;
+    setImgs(shuffle(imageIds, rand));
+  }, [rand, imageIds]);
+
+  return { imageIds: imgs, deleteImage };
+}
+function usePages(db) {
+  const { imageIds, deleteImage } = useRandomImageIds(db);
   const { selectedState } = useSelectedState();
 
   const [currentPage, updateState_currentPage] = useStore(

@@ -91,7 +91,6 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
         v.thumb = cats[i % cats.length].thumb;
         v.reg = cats[i % cats.length].reg;
       });
-
   return (
     <div>
       <AppBar
