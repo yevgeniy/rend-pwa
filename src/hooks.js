@@ -277,7 +277,6 @@ export function useImages(db) {
   return {
     images,
     updateImage,
-    setImages,
     deleteImage,
     totalPages,
     currentPage,

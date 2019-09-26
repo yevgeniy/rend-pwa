@@ -58,7 +58,6 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
   let {
     images: imgs,
     updateImage,
-    setImages,
     deleteImage,
     totalPages,
     currentPage,
@@ -108,16 +107,6 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
           >
             <MenuIcon />
           </IconButton>
-          {state === "__MARKED__" ? (
-            <IconButton
-              edge="start"
-              color="inherit"
-              className={classes.toolButton}
-              onClick={() => setImages(null)}
-            >
-              <Renew />
-            </IconButton>
-          ) : null}
           <IconButton
             edge="start"
             color="inherit"
