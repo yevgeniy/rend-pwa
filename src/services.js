@@ -56,19 +56,21 @@ export async function getMarkedImages(db) {
 
   return images;
 }
+export async function getDrawingImageIds(db) {
+  return await db
+    .collection("images")
+    .aggregate([{ $match: { drawing: true } }, { $group: { _id: "$id" } }])
+    .toArray()
+    .then(res => res.map(v => v._id));
+}
 export async function getMarkedImageIds(db) {
   let imageIds = await db
     .collection("images")
     .aggregate([{ $match: { marked: true } }, { $group: { _id: "$id" } }])
     .toArray()
     .then(res => res.map(v => v._id));
-  let drawingIds = await db
-    .collection("images")
-    .aggregate([{ $match: { drawing: true } }, { $group: { _id: "$id" } }])
-    .toArray()
-    .then(res => res.map(v => v._id));
 
-  return { imageIds, drawingIds };
+  return imageIds;
 }
 export async function getImagesByIds(db, imageIds) {
   console.log(imageIds);

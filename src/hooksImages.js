@@ -1,68 +1,55 @@
-import { useState, useEffect } from "react";
-import { useUpdate, useStore, useSelectedState } from "./hooks";
+import { useState, useEffect, useMemo } from "react";
+import { useMemoState, useUpdate, useStore, useSelectedState } from "./hooks";
 import {
   getStateImageIds,
   getMarkedImageIds,
   getImagesByIds,
+  getDrawingImageIds,
   shuffle
 } from "./services";
 
-function useImageIds(db, selectedState) {
-  const [imageIds, setImageIds] = useState(null);
-  const rand = useRand(selectedState);
+function useDrawingImageIds(db, selectedState) {
+  const [imageIds] = useMemoState(() => {
+    if (!selectedState) return null;
+    if (selectedState === "__MARKED__") return getDrawingImageIds(db);
 
-  useEffect(() => {
-    if (!selectedState || !rand) {
-      setImageIds(null);
-      return;
-    }
-    if (selectedState === "__MARKED__")
-      getMarkedImageIds(db)
-        .then(({ imageIds, drawingIds }) => {
-          setImageIds(
-            Array.from(
-              new Set([...drawingIds, ...shuffle(imageIds, rand)])
-            ).filter(v => !!v)
-          );
-        })
-        .catch(err => {
-          throw err;
-        });
-    else
-      getStateImageIds(db, selectedState)
-        .then(images => setImageIds(images.filter(v => !!v)))
-        .catch(err => {
-          throw err;
-        });
+    return null;
   }, [selectedState, db]);
 
-  const deleteImage = async id => {
-    await db.collection("images").deleteOne({ id });
-    imageIds && setImageIds(imageIds.filter(v => v !== id));
-  };
-
-  return { imageIds, deleteImage };
+  return imageIds;
 }
 
-function useRand(selectedState) {
+function useImageIds(db, selectedState) {
+  const [imageIds] = useMemoState(() => {
+    if (!selectedState) return;
+    if (selectedState === "__MARKED__") return getMarkedImageIds(db);
+    else return getStateImageIds(db, selectedState);
+  }, [selectedState, db]);
+
+  const shuffledImageIds = useShuffledImageIds(
+    imageIds,
+    selectedState === "__MARKED__"
+  );
+
+  return shuffledImageIds;
+}
+
+function useShuffledImageIds(imageIds, doShuffle) {
   const [rand, updateState] = useStore(s => s.rand);
 
-  useEffect(() => {
-    if (rand) return;
-    if (selectedState)
-      updateState({
-        rand: new Array(10).fill(0, 0, 10).map(v => Math.random())
-      });
-  }, []);
+  const imgs = useMemo(() => {
+    return rand && imageIds ? shuffle([...imageIds], rand) : imageIds;
+  }, [rand]);
+
   useUpdate(() => {
     updateState({
-      rand: !selectedState
+      rand: !doShuffle
         ? null
         : new Array(10).fill(0, 0, 10).map(v => Math.random())
     });
-  }, [selectedState]);
+  }, [imageIds, doShuffle]);
 
-  return rand;
+  return imgs;
 }
 function usePages(imageIds, selectedState) {
   const [currentPage, updateState_currentPage] = useStore(
@@ -141,15 +128,28 @@ function useImages(imageIds, db, selectedState) {
 }
 export function useImagesSystem(db) {
   const { selectedState } = useSelectedState();
-  const { imageIds: allimageids, deleteImage } = useImageIds(db, selectedState);
+  const allimageids = useImageIds(db, selectedState);
+  const drawingimageids = useDrawingImageIds(db, selectedState);
+
+  const [imageIds, setImageIds] = useMemoState(() => {
+    return Array.from(
+      new Set([...(drawingimageids || []), ...(allimageids || [])])
+    ).filter(v => !!v);
+  }, [allimageids, drawingimageids]);
+
   const {
     imageIds: pageimageids,
     currentPage,
     totalPages,
     pageSize,
     setPage
-  } = usePages(allimageids, selectedState);
+  } = usePages(imageIds, selectedState);
   const { images, updateImage } = useImages(pageimageids, db, selectedState);
+
+  const deleteImage = async id => {
+    await db.collection("images").deleteOne({ id });
+    imageIds && setImageIds(imageIds.filter(v => v !== id));
+  };
 
   return {
     images,

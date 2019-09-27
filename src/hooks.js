@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useContext } from "react";
+import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
 import localforage from "localforage";
 import {
   Stitch,
@@ -100,15 +100,9 @@ export function useStates() {
 }
 
 export function useSelectedState() {
-  const [selectedState, updateState] = useStore(({ selectedState }) => {
-    if (
-      selectedState &&
-      (selectedState.constructor === Number ||
-        selectedState.constructor === String)
-    )
-      return selectedState;
-    return null;
-  });
+  const [selectedState, updateState] = useStore(
+    ({ selectedState }) => selectedState
+  );
 
   const setSelectedState = selectedState => {
     updateState({
@@ -127,4 +121,17 @@ export function useUpdate(fn, args) {
     }
     fn();
   }, args);
+}
+export function useMemoState(fn, args) {
+  const r = useMemo(fn, args);
+  const [val, setVal] = useState(null);
+
+  useEffect(() => {
+    if (r && r.then)
+      r.then(setVal).catch(e => {
+        throw e;
+      });
+  }, [r]);
+
+  return [r && r.then ? val : r, setVal];
 }
