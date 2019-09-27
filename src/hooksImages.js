@@ -114,10 +114,7 @@ function usePages(imageIds, selectedState) {
   };
 }
 function useImages(imageIds, db, selectedState) {
-  const [images, updateState] = useStore(({ images }) => {
-    if (images && images.constructor === Array) return images;
-    return null;
-  });
+  const [images, updateState] = useStore(({ images }) => images);
 
   useEffect(() => {
     if (!selectedState) updateState({ images: null });
