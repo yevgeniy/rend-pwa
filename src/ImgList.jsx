@@ -87,13 +87,13 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     brokenLinksRef.current = new Set();
   };
 
-  /* show safe cats :D */
-  if (window.location.href.match("localhost"))
-    if (imgs)
-      imgs.forEach((v, i) => {
-        v.thumb = cats[i % cats.length].thumb;
-        v.reg = cats[i % cats.length].reg;
-      });
+  // /* show safe cats :D */
+  // if (window.location.href.match("localhost"))
+  //   if (imgs)
+  //     imgs.forEach((v, i) => {
+  //       v.thumb = cats[i % cats.length].thumb;
+  //       v.reg = cats[i % cats.length].reg;
+  //     });
   return (
     <div>
       <AppBar

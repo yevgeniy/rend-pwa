@@ -26,34 +26,30 @@ function useImageIds(db, selectedState) {
     else return getStateImageIds(db, selectedState);
   }, [selectedState, db]);
 
-  const shuffledImageIds = useShuffledImageIds(
-    imageIds,
-    selectedState === "__MARKED__"
-  );
-
+  const shuffledImageIds = useShuffledImageIds(imageIds, selectedState);
   return shuffledImageIds;
 }
 
-function useShuffledImageIds(imageIds, doShuffle) {
+function useShuffledImageIds(imageIds, selectedState) {
   const [rand, updateState] = useStore(s => s.rand);
 
   const imgs = useMemo(() => {
-    return rand && imageIds ? shuffle([...imageIds], rand) : imageIds;
-  }, [rand]);
+    const res = rand && imageIds ? shuffle([...imageIds], rand) : imageIds;
+    return res;
+  }, [rand, imageIds]);
 
   useUpdate(() => {
-    updateState({
-      rand: !doShuffle
-        ? null
-        : new Array(10).fill(0, 0, 10).map(v => Math.random())
-    });
-  }, [imageIds, doShuffle]);
-
+    selectedState === "__MARKED__"
+      ? updateState({
+          rand: new Array(10).fill(0, 0, 10).map(v => Math.random())
+        })
+      : updateState({ rand: null });
+  }, [selectedState]);
   return imgs;
 }
 function usePages(imageIds, selectedState) {
-  const [currentPage, updateState_currentPage] = useStore(
-    ({ currentPage }) => currentPage || 0
+  const [currentPage, updateState_currentPage] = useStore(({ currentPage }) =>
+    Math.max(0, currentPage || 0)
   );
   const [totalPages, updateState_totalPages] = useStore(
     ({ totalPages }) => totalPages
@@ -75,8 +71,10 @@ function usePages(imageIds, selectedState) {
     const ps = Math.max(1, Math.min(pageSize, 1000));
     const tp = Math.ceil(tlen / ps);
 
+    const cp = Math.min(tp - 1, currentPage);
+
     updateState_totalPages({ totalPages: tp });
-    updateState_currentPage({ currentPage: Math.min(tp - 1, currentPage) });
+    updateState_currentPage({ currentPage: cp });
   }, [imageIds && imageIds.length]);
 
   useEffect(() => {
@@ -132,6 +130,7 @@ export function useImagesSystem(db) {
   const drawingimageids = useDrawingImageIds(db, selectedState);
 
   const [imageIds, setImageIds] = useMemoState(() => {
+    if (!allimageids) return null;
     return Array.from(
       new Set([...(drawingimageids || []), ...(allimageids || [])])
     ).filter(v => !!v);

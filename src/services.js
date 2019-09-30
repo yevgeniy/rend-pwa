@@ -73,7 +73,6 @@ export async function getMarkedImageIds(db) {
   return imageIds;
 }
 export async function getImagesByIds(db, imageIds) {
-  console.log(imageIds);
   const images = await db
     .collection("images")
     .find({ id: { $in: imageIds } })
