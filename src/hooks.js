@@ -1,4 +1,11 @@
-import React, { useMemo, useRef, useState, useEffect, useContext } from "react";
+import React, {
+  useMemo,
+  useRef,
+  useState,
+  useEffect,
+  useContext,
+  useCallback
+} from "react";
 import localforage from "localforage";
 import {
   Stitch,
@@ -123,15 +130,26 @@ export function useUpdate(fn, args) {
   }, args);
 }
 export function useMemoState(fn, args) {
-  const r = useMemo(fn, args);
-  const [val, setVal] = useState(null);
+  const ref = useRef(null);
+  const r = useMemo(() => {
+    ref.current = null;
+    return fn();
+  }, args);
+  const [val, setVal] = useState(r && r.then ? null : r);
 
   useEffect(() => {
     if (r && r.then)
       r.then(setVal).catch(e => {
         throw e;
       });
+    else setVal(r);
   }, [r]);
 
-  return [r && r.then ? val : r, setVal];
+  const setter = v => {
+    ref.current = true;
+    setVal(v);
+  };
+
+  /*return state if state was set or memo is waiting on a promise*/
+  return [ref.current || (r && r.then) ? val : r, setter];
 }

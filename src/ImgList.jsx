@@ -18,6 +18,7 @@ import StatesView from "./StatesView";
 import ImgView from "./ImgView";
 import { useImagesSystem, useSelectedImage, useImageSrc } from "./hooksImages";
 import cats from "./cats";
+let c = 0;
 
 const useStyles = makeStyles(
   theme => {
@@ -94,6 +95,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
   //       v.thumb = cats[i % cats.length].thumb;
   //       v.reg = cats[i % cats.length].reg;
   //     });
+
   return (
     <div>
       <AppBar
@@ -123,7 +125,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
             className={classes.toolButton}
             edge="start"
             color="inherit"
-            onClick={() => setPage(currentPage + 1)}
+            onClick={() => setPage(Math.min(currentPage + 1, totalPages - 1))}
           >
             {currentPage + 1} / {totalPages}
             <NavigateNext />
@@ -144,10 +146,10 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
             [classes.isImgSelected]: selectedImage
           })}
         >
-          {(imgs || []).map(img => {
+          {(imgs || []).map((img, i) => {
             return (
               <Img
-                key={img.id}
+                key={i}
                 doSelectImage={doSelectImage}
                 brokenLinksRef={brokenLinksRef}
                 {...img}
@@ -275,20 +277,21 @@ const useImgStyles = makeStyles(
 );
 const Img = React.memo(({ doSelectImage, brokenLinksRef, ...img }) => {
   const classes = useImgStyles();
+  const imgref = useRef();
 
-  const { src, isError, didError } = useImageSrc(img);
+  const { src, isError } = useImageSrc(img, imgref);
 
   useEffect(() => {
     if (isError) brokenLinksRef.current.add(img.id);
   }, [isError]);
-
+  if (!src && isError === null) return null;
   return (
     <div className={classes.root} onClick={() => doSelectImage(img)}>
       <IconsContainer {...img} />
       {isError ? (
         <BrockenImage className={classes.brokenImg} />
       ) : (
-        <img src={src} onError={didError} alt="" />
+        <img ref={imgref} src={src} alt="" />
       )}
     </div>
   );

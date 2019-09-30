@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useMemoState, useUpdate, useStore, useSelectedState } from "./hooks";
 import {
   getStateImageIds,
@@ -7,11 +7,13 @@ import {
   getDrawingImageIds,
   shuffle
 } from "./services";
+import { dim } from "ansi-colors";
 
 function useDrawingImageIds(db, selectedState) {
   const [imageIds] = useMemoState(() => {
     if (!selectedState) return null;
-    if (selectedState === "__MARKED__") return getDrawingImageIds(db);
+    if (selectedState === "__MARKED__")
+      return getDrawingImageIds(db).then(v => v.sort());
 
     return null;
   }, [selectedState, db]);
@@ -22,8 +24,9 @@ function useDrawingImageIds(db, selectedState) {
 function useImageIds(db, selectedState) {
   const [imageIds] = useMemoState(() => {
     if (!selectedState) return;
-    if (selectedState === "__MARKED__") return getMarkedImageIds(db);
-    else return getStateImageIds(db, selectedState);
+    if (selectedState === "__MARKED__")
+      return getMarkedImageIds(db).then(v => v.sort());
+    else return getStateImageIds(db, selectedState).then(v => v.sort());
   }, [selectedState, db]);
 
   const shuffledImageIds = useShuffledImageIds(imageIds, selectedState);
@@ -143,13 +146,18 @@ export function useImagesSystem(db) {
     pageSize,
     setPage
   } = usePages(imageIds, selectedState);
+  console.log("a", pageimageids);
+
   const { images, updateImage } = useImages(pageimageids, db, selectedState);
-
   const deleteImage = async id => {
+    if (!imageIds) return;
     await db.collection("images").deleteOne({ id });
-    imageIds && setImageIds(imageIds.filter(v => v !== id));
-  };
 
+    imageIds &&
+      setImageIds(imageIds => {
+        return imageIds.filter(v => v !== id);
+      });
+  };
   return {
     images,
     updateImage,
@@ -173,18 +181,49 @@ export function useSelectedImage() {
   return { selectedImage, setSelectedImage };
 }
 export const useImageSrc = img => {
-  const [src, setSrc] = useState(null);
-  const [isError, setIsError] = useState(false);
+  let [src, setSrc] = useState(null);
+  let [isError, setIsError] = useState(false);
 
+  // useEffect(() => {
+  //   return () => {
+  //     setSrc = function() {};
+  //     setIsError = function() {};
+  //   };
+  // });
+
+  const getsrc = src => {
+    if (src === img.large) return null;
+    else if (src === img.reg) return img.reg;
+    else if (src === img.thumb) return img.large;
+  };
+  const test = elm => {
+    if (elm.width === 0 || elm.height === 0) return false;
+    return true;
+  };
+  const newtry = src => {
+    if (src === null) {
+      setIsError(true);
+      return;
+    }
+    const elm = new Image();
+    elm.onload = () => {
+      if (!test(elm)) newtry(getsrc(src));
+      else setSrc(src);
+    };
+    elm.onerror = () => {
+      newtry(getsrc(src));
+    };
+    elm.src = src;
+
+    if (elm.complete) {
+      if (!test(elm)) newtry(getsrc(src));
+      else setSrc(src);
+    }
+  };
   useEffect(() => {
-    setSrc(img.thumb);
+    setIsError(null);
+    newtry(img.thumb);
   }, [img.id]);
 
-  const didError = () => {
-    if (src === img.thumb) setSrc(img.reg);
-    else if (src === img.reg) setSrc(img.large);
-    else if (src === img.large) setIsError(true);
-  };
-
-  return { src, isError, didError };
+  return { src, isError };
 };
