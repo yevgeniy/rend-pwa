@@ -18,7 +18,6 @@ import StatesView from "./StatesView";
 import ImgView from "./ImgView";
 import { useImagesSystem, useSelectedImage, useImageSrc } from "./hooksImages";
 import cats from "./cats";
-let c = 0;
 
 const useStyles = makeStyles(
   theme => {
