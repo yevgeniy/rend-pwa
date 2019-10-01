@@ -38,16 +38,21 @@ function useShuffledImageIds(imageIds, selectedState) {
   const [rand, updateState] = useStore(s => s.rand);
 
   const imgs = useMemo(() => {
+    console.log("RERUNNING RAND: ", !!rand);
     const res = rand && imageIds ? shuffle([...imageIds], rand) : imageIds;
     return res;
   }, [rand, imageIds]);
 
   useUpdate(() => {
-    selectedState === "__MARKED__"
-      ? updateState({
-          rand: new Array(10).fill(0, 0, 10).map(v => Math.random())
-        })
-      : updateState({ rand: null });
+    if (selectedState === "__MARKED__") {
+      console.log("NEW RAND");
+      updateState({
+        rand: new Array(10).fill(0, 0, 10).map(v => Math.random())
+      });
+    } else
+      updateState({
+        rand: null
+      });
   }, [selectedState]);
   return imgs;
 }
@@ -67,6 +72,7 @@ function usePages(imageIds, selectedState) {
     if (!selectedState) return;
     updateState_currentPage({ currentPage: 0 });
   }, [selectedState]);
+
   useEffect(() => {
     if (!imageIds) {
       return;
@@ -75,10 +81,8 @@ function usePages(imageIds, selectedState) {
     const ps = Math.max(1, Math.min(pageSize, 1000));
     const tp = Math.ceil(tlen / ps);
 
-    const cp = Math.min(tp - 1, currentPage);
-
+    if (currentPage > tp - 1) updateState_currentPage({ currentPage: tp - 1 });
     updateState_totalPages({ totalPages: tp });
-    updateState_currentPage({ currentPage: cp });
   }, [imageIds && imageIds.length]);
 
   useEffect(() => {
@@ -115,7 +119,7 @@ function useImages(imageIds, db, selectedState) {
     getImagesByIds(db, imageIds)
       .then(async res => {
         res = await removeDuplicates(res, db);
-        updateState({ images: res });
+        updateState({ images: imageIds.map(id => res.find(v => id === v.id)) });
       })
       .catch(err => {
         throw err;
@@ -150,7 +154,7 @@ export function useImagesSystem(db) {
     pageSize,
     setPage
   } = usePages(imageIds, selectedState);
-  console.log("a", pageimageids);
+  console.log("a", (pageimageids || []).slice(0, 20));
 
   const { images, updateImage } = useImages(pageimageids, db, selectedState);
 
