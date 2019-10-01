@@ -138,6 +138,7 @@ function useImages(imageIds, db, selectedState) {
 export function useImagesSystem(db) {
   const { selectedState } = useSelectedState();
   const allimageids = useImageIds(db, selectedState);
+  console.log("a", (allimageids || []).slice(0, 20));
   const drawingimageids = useDrawingImageIds(db, selectedState);
 
   const [imageIds, setImageIds] = useMemoState(() => {
@@ -154,7 +155,6 @@ export function useImagesSystem(db) {
     pageSize,
     setPage
   } = usePages(imageIds, selectedState);
-  console.log("a", (pageimageids || []).slice(0, 20));
 
   const { images, updateImage } = useImages(pageimageids, db, selectedState);
 

@@ -1,6 +1,6 @@
 export function shuffle(a, rand) {
   for (let i = a.length - 1; i > 0; i--) {
-    let r = rand[i] % rand.length;
+    let r = rand[i % rand.length];
     const j = Math.floor(r * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
