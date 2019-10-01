@@ -5,7 +5,8 @@ import {
   getMarkedImageIds,
   getImagesByIds,
   getDrawingImageIds,
-  shuffle
+  shuffle,
+  removeDuplicates
 } from "./services";
 import { dim } from "ansi-colors";
 
@@ -112,7 +113,10 @@ function useImages(imageIds, db, selectedState) {
     if (!imageIds) return;
 
     getImagesByIds(db, imageIds)
-      .then(res => updateState({ images: res }))
+      .then(async res => {
+        res = await removeDuplicates(res, db);
+        updateState({ images: res });
+      })
       .catch(err => {
         throw err;
       });
@@ -149,6 +153,7 @@ export function useImagesSystem(db) {
   console.log("a", pageimageids);
 
   const { images, updateImage } = useImages(pageimageids, db, selectedState);
+
   const deleteImage = async id => {
     if (!imageIds) return;
     await db.collection("images").deleteOne({ id });
@@ -180,50 +185,31 @@ export function useSelectedImage() {
   };
   return { selectedImage, setSelectedImage };
 }
-export const useImageSrc = img => {
-  let [src, setSrc] = useState(null);
-  let [isError, setIsError] = useState(false);
+export const useImageSrc = (img, ref) => {
+  let [src, setSrc] = useState(img.thumb);
+  let [isError, setIsError] = useState(null);
 
-  // useEffect(() => {
-  //   return () => {
-  //     setSrc = function() {};
-  //     setIsError = function() {};
-  //   };
-  // });
+  useEffect(() => {
+    if (isError !== null) return;
 
-  const getsrc = src => {
+    const t = setInterval(() => {
+      if (ref.current && ref.current.complete) {
+        if (ref.current.width === 0 || ref.current.height === 0) {
+          const newsrc = getsrc(src);
+          if (newsrc === null) setIsError(true);
+          else setSrc(newsrc);
+        } else setIsError(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(t);
+  }, [isError, src]);
+
+  function getsrc(src) {
     if (src === img.large) return null;
     else if (src === img.reg) return img.reg;
     else if (src === img.thumb) return img.large;
-  };
-  const test = elm => {
-    if (elm.width === 0 || elm.height === 0) return false;
-    return true;
-  };
-  const newtry = src => {
-    if (src === null) {
-      setIsError(true);
-      return;
-    }
-    const elm = new Image();
-    elm.onload = () => {
-      if (!test(elm)) newtry(getsrc(src));
-      else setSrc(src);
-    };
-    elm.onerror = () => {
-      newtry(getsrc(src));
-    };
-    elm.src = src;
-
-    if (elm.complete) {
-      if (!test(elm)) newtry(getsrc(src));
-      else setSrc(src);
-    }
-  };
-  useEffect(() => {
-    setIsError(null);
-    newtry(img.thumb);
-  }, [img.id]);
+  }
 
   return { src, isError };
 };

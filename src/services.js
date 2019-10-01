@@ -6,6 +6,27 @@ export function shuffle(a, rand) {
   }
   return a;
 }
+export async function removeDuplicates(images, db) {
+  const rep = {};
+  const rem = [];
+  images.forEach((v, i) => {
+    if (rep[v.id]) {
+      rem.push(v);
+      return;
+    }
+
+    rep[v.id] = v;
+  });
+  const proms = rem.map(v => {
+    const i = images.findIndex(i => i === v);
+    images.splice(i, 1);
+    console.log("DELETING", v);
+    //return new Promise(res => setTimeout(res, 1000));
+    return db.collection("images").deleteOne({ _id: v._id });
+  });
+  await Promise.all(proms);
+  return images;
+}
 export async function getStates(db) {
   var [err, res] = await new Promise(async res => {
     var r = await db

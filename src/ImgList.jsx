@@ -88,14 +88,13 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     brokenLinksRef.current = new Set();
   };
 
-  // /* show safe cats :D */
-  // if (window.location.href.match("localhost"))
-  //   if (imgs)
-  //     imgs.forEach((v, i) => {
-  //       v.thumb = cats[i % cats.length].thumb;
-  //       v.reg = cats[i % cats.length].reg;
-  //     });
-
+  /* show safe cats :D */
+  if (window.location.href.match("localhost"))
+    if (imgs)
+      imgs.forEach((v, i) => {
+        v.thumb = cats[i % cats.length].thumb;
+        v.reg = cats[i % cats.length].reg;
+      });
   return (
     <div>
       <AppBar
@@ -146,10 +145,10 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
             [classes.isImgSelected]: selectedImage
           })}
         >
-          {(imgs || []).map((img, i) => {
+          {(imgs || []).map(img => {
             return (
               <Img
-                key={i}
+                key={img.id}
                 doSelectImage={doSelectImage}
                 brokenLinksRef={brokenLinksRef}
                 {...img}
@@ -284,7 +283,7 @@ const Img = React.memo(({ doSelectImage, brokenLinksRef, ...img }) => {
   useEffect(() => {
     if (isError) brokenLinksRef.current.add(img.id);
   }, [isError]);
-  if (!src && isError === null) return null;
+
   return (
     <div className={classes.root} onClick={() => doSelectImage(img)}>
       <IconsContainer {...img} />
