@@ -207,19 +207,16 @@ export const useImageSrc = (img, ref) => {
           width: ref.current.width,
           height: ref.current.height
         }));
-        if (ref.current.width === 0 || ref.current.height === 0) {
+        if (ref.current.width <= 20 || ref.current.height <= 20) {
           const newsrc = getsrc(src);
           if (newsrc === null) {
-            setDiag(null);
+            setDiag(diag => ({ ...diag, src: null }));
             setIsError(true);
           } else {
             setSrc(newsrc);
           }
         } else {
-          setDiag(diag => ({
-            ...diag,
-            src: null
-          }));
+          setDiag(null);
           setIsError(false);
         }
       } else
