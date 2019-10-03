@@ -190,30 +190,66 @@ export function useSelectedImage() {
   return { selectedImage, setSelectedImage };
 }
 export const useImageSrc = (img, ref) => {
-  let [src, setSrc] = useState(img.thumb);
-  let [isError, setIsError] = useState(null);
+  const [src, setSrc] = useState(img.thumb);
+  const [isError, setIsError] = useState(null);
+  const [diag, setDiag] = useState({ attempt: `thumb`, src: img.thumb });
 
   useEffect(() => {
     if (isError !== null) return;
 
+    let c = 0;
     const t = setInterval(() => {
+      setDiag({ ...diag, counter: ++c });
       if (ref.current && ref.current.complete) {
+        setDiag(d =>
+          d.complete
+            ? d
+            : {
+                ...d,
+                complete: true,
+                width: ref.current.width,
+                height: ref.current.height
+              }
+        );
         if (ref.current.width === 0 || ref.current.height === 0) {
           const newsrc = getsrc(src);
-          if (newsrc === null) setIsError(true);
-          else setSrc(newsrc);
-        } else setIsError(false);
-      }
+          if (newsrc === null) {
+            setDiag(null);
+            setIsError(true);
+          } else {
+            setSrc(newsrc);
+          }
+        } else {
+          setDiag(null);
+          setIsError(false);
+        }
+      } else
+        setDiag(d =>
+          d.complete ? { ...d, complete: false, width: null, height: null } : d
+        );
     }, 1000);
 
     return () => clearInterval(t);
   }, [isError, src]);
 
   function getsrc(src) {
-    if (src === img.large) return null;
-    else if (src === img.reg) return img.reg;
-    else if (src === img.thumb) return img.large;
+    if (src === img.large) {
+      setDiag(null);
+      return null;
+    } else if (src === img.reg) {
+      setDiag({
+        attempt: "reg",
+        src: img.reg
+      });
+      return img.reg;
+    } else if (src === img.thumb) {
+      setDiag({
+        attempt: "large",
+        src: img.large
+      });
+      return img.large;
+    }
   }
 
-  return { src, isError };
+  return { src, isError, diag };
 };

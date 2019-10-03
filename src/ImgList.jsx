@@ -277,7 +277,7 @@ const Img = React.memo(({ doSelectImage, brokenLinksRef, ...img }) => {
   const classes = useImgStyles();
   const imgref = useRef();
 
-  const { src, isError } = useImageSrc(img, imgref);
+  const { src, isError, diag } = useImageSrc(img, imgref);
 
   useEffect(() => {
     if (isError) brokenLinksRef.current.add(img.id);
@@ -289,7 +289,22 @@ const Img = React.memo(({ doSelectImage, brokenLinksRef, ...img }) => {
       {isError ? (
         <BrockenImage className={classes.brokenImg} />
       ) : (
-        <img ref={imgref} src={src} alt="" />
+        <div>
+          {diag ? (
+            <>
+              <div>{diag.attempt}</div>
+              <div>{diag.src}</div>
+              <div>
+                {(!!diag.complete).toString()} {diag.counter}
+              </div>
+              <div>
+                {diag.width} {diag.height}
+              </div>
+            </>
+          ) : null}
+
+          <img ref={imgref} src={src} alt="" />
+        </div>
       )}
     </div>
   );
