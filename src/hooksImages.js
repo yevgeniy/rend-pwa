@@ -199,18 +199,14 @@ export const useImageSrc = (img, ref) => {
 
     let c = 0;
     const t = setInterval(() => {
-      setDiag({ ...diag, counter: ++c });
+      setDiag(diag => ({ ...diag, counter: ++c }));
       if (ref.current && ref.current.complete) {
-        setDiag(d =>
-          d.complete
-            ? d
-            : {
-                ...d,
-                complete: true,
-                width: ref.current.width,
-                height: ref.current.height
-              }
-        );
+        setDiag(diag => ({
+          ...diag,
+          complete: true,
+          width: ref.current.width,
+          height: ref.current.height
+        }));
         if (ref.current.width === 0 || ref.current.height === 0) {
           const newsrc = getsrc(src);
           if (newsrc === null) {
@@ -220,13 +216,19 @@ export const useImageSrc = (img, ref) => {
             setSrc(newsrc);
           }
         } else {
-          setDiag(null);
+          setDiag(diag => ({
+            ...diag,
+            src: null
+          }));
           setIsError(false);
         }
       } else
-        setDiag(d =>
-          d.complete ? { ...d, complete: false, width: null, height: null } : d
-        );
+        setDiag(diag => ({
+          ...diag,
+          complete: false,
+          width: null,
+          height: null
+        }));
     }, 1000);
 
     return () => clearInterval(t);
@@ -238,12 +240,14 @@ export const useImageSrc = (img, ref) => {
       return null;
     } else if (src === img.reg) {
       setDiag({
+        ...diag,
         attempt: "reg",
         src: img.reg
       });
       return img.reg;
     } else if (src === img.thumb) {
       setDiag({
+        ...diag,
         attempt: "large",
         src: img.large
       });
