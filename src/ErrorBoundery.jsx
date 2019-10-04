@@ -53,7 +53,7 @@ class ErrorBoundary extends React.Component {
 }
 
 const ClearCache = ({ didClearCache, error, info }) => {
-  const [_, _2, clear] = useStore(v => v);
+  const [, , clear] = useStore(v => v);
   const doClearCashe = () => {
     clear();
     didClearCache();
