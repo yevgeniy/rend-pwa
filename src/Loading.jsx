@@ -5,23 +5,25 @@ import icon from "./loader.ico";
 const SPEED = 500;
 const DELAY = 1500;
 
-const useStyles = makeStyles(theme => {
-  return {
-    root: {
-      display: "flex",
-      height: "90vh",
-      width: "100%",
-      justifyContent: "center",
-      alignItems: "center",
-      transition: `all ${SPEED}ms ease-out`,
-    },
-    img: {
-      width: 50,
-      transform: "translate(0,-50px)"
-    }
-  }
-}, { name: 'loader' })
-
+const useStyles = makeStyles(
+  theme => {
+    return {
+      root: {
+        display: "flex",
+        height: "90vh",
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+        transition: `all ${SPEED}ms ease-out`
+      },
+      img: {
+        width: 50,
+        transform: "translate(0,-50px)"
+      }
+    };
+  },
+  { name: "loader" }
+);
 
 const Loading = React.memo(({ test, children }) => {
   const classes = useStyles();
@@ -31,9 +33,10 @@ const Loading = React.memo(({ test, children }) => {
   const loaded = useDelayLoading(test);
   const [opacity, showContent] = useShowContent(loaded);
   useEffect(() => {
-    if (rat === 1) setTimeout(() => setRat(0.9), SPEED);
-    else if (rat === 0.9) setTimeout(() => setRat(1), SPEED);
+    if (rat === 1) var t = setTimeout(() => setRat(0.9), SPEED);
+    else if (rat === 0.9) var t = setTimeout(() => setRat(1), SPEED);
     else setRat(0.9);
+    return () => clearTimeout(t);
   }, [rat]);
 
   const containerStyle = {};
@@ -60,8 +63,9 @@ function useShowContent(loaded) {
       setShowContent(false);
     } else {
       setOpacity(0);
-      setTimeout(() => setShowContent(true), 500);
+      var t = setTimeout(() => setShowContent(true), 500);
     }
+    return clearTimeout(t);
   }, [loaded]);
 
   return [opacity, showContent];
@@ -87,12 +91,13 @@ function useDelayLoading(test) {
       if (tf - ti.current > DELAY) setLoaded(true);
       else {
         const res = DELAY - (tf - ti.current);
-        setTimeout(() => setLoaded(true), res);
+        var t = setTimeout(() => setLoaded(true), res);
       }
     }
+    return () => clearTimeout(t);
   }, [test]);
 
   return loaded;
-};
+}
 
 export default Loading;

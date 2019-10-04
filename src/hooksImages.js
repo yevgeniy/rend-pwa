@@ -119,7 +119,11 @@ function useImages(imageIds, db, selectedState) {
     getImagesByIds(db, imageIds)
       .then(async res => {
         res = await removeDuplicates(res, db);
-        updateState({ images: imageIds.map(id => res.find(v => id === v.id)) });
+        updateState({
+          images: imageIds
+            .map(id => res.find(v => id === v.id))
+            .filter(v => !!v)
+        });
       })
       .catch(err => {
         throw err;
@@ -138,7 +142,7 @@ function useImages(imageIds, db, selectedState) {
 export function useImagesSystem(db) {
   const { selectedState } = useSelectedState();
   const allimageids = useImageIds(db, selectedState);
-  console.log("a", (allimageids || []).slice(0, 20));
+
   const drawingimageids = useDrawingImageIds(db, selectedState);
 
   const [imageIds, setImageIds] = useMemoState(() => {
@@ -157,6 +161,7 @@ export function useImagesSystem(db) {
   } = usePages(imageIds, selectedState);
 
   const { images, updateImage } = useImages(pageimageids, db, selectedState);
+  console.log("a", images);
 
   const deleteImage = async id => {
     if (!imageIds) return;
