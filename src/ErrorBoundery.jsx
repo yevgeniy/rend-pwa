@@ -19,8 +19,9 @@ class ErrorBoundary extends React.Component {
   trackclick = () => {
     clearTimeout(this.t);
     this.t = setTimeout(() => {
+      console.log("cleared");
       this.c = 0;
-    }, 5000);
+    }, 1000);
 
     this.c++;
     if (this.c === 5) {
