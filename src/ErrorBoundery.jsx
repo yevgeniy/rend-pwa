@@ -1,12 +1,33 @@
 import React from "react";
-import { Button, Divider } from "@material-ui/core";
+import { Button, Divider, makeStyles } from "@material-ui/core";
 import { useStore } from "./hooks";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false };
+    this.c = 0;
   }
+
+  componentDidMount() {
+    window.addEventListener("click", this.trackclick);
+  }
+  componentWillUnmount() {
+    window.removeEventListener("click", this.trackclick);
+  }
+
+  trackclick = () => {
+    clearTimeout(this.t);
+    this.t = setTimeout(() => {
+      this.c = 0;
+    }, 5000);
+
+    this.c++;
+    if (this.c === 5) {
+      this.setState({ hasError: true });
+      this.c = 0;
+    }
+  };
 
   componentDidCatch(error, info) {
     this.setState({ hasError: true, error, info });
@@ -23,6 +44,7 @@ class ErrorBoundary extends React.Component {
     return this.props.children;
   }
 }
+
 const ClearCache = ({ didClearCache, error, info }) => {
   const [_, _2, clear] = useStore(v => v);
   const doClearCashe = () => {
@@ -31,15 +53,15 @@ const ClearCache = ({ didClearCache, error, info }) => {
   };
   return (
     <div>
-      <div>
+      <div style={{ padding: "5px 0" }}>
         <Button variant="contained" color="primary" onClick={doClearCashe}>
           Clear Cache
         </Button>
       </div>
       <Divider />
-      <div>Error: {error.toString()}</div>
+      <div style={{ padding: "5px 0" }}>Error: {error && error.toString()}</div>
       <Divider />
-      <div>Info: {info.toString()}</div>
+      <div style={{ padding: "5px 0" }}>Info: {info && info.toString()}</div>
     </div>
   );
 };

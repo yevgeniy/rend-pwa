@@ -1,4 +1,4 @@
-import React, { useState, Suspense } from "react";
+import React, { useEffect, useState, Suspense } from "react";
 
 import { makeStyles } from "@material-ui/core";
 import Loading from "./Loading";
@@ -17,6 +17,10 @@ const App = React.memo(() => {
   const db = useDb();
   let states = useStates(null);
   const [nav, setNav] = useState(null);
+  useEffect(() => {
+    if (!states) setNav(null);
+  });
+
   if (!db) return null;
   return (
     <div className={classes.root}>

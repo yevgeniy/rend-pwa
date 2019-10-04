@@ -83,7 +83,9 @@ export function useStore(extractor) {
   const updateState = st => {
     Store.updateState(st);
   };
-  const clear = () => {};
+  const clear = () => {
+    Store.clear();
+  };
 
   return [val, updateState, clear];
 }
@@ -106,15 +108,15 @@ export function useDb() {
 export function useStates() {
   const db = useDb();
   const [states, updateState] = useStore(({ states }) => {
-    if (states && states.constructor === Array) return states;
-    return null;
+    return states;
   });
   useEffect(() => {
     if (!db) return;
+    if (states) return;
     getStates(db)
       .then(states => updateState({ states }))
       .catch(e => console.log(e));
-  }, [db]);
+  }, [db, states]);
 
   return states;
 }
