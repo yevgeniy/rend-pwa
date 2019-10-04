@@ -43,6 +43,18 @@ const Store = {
       v(this.state);
     });
   },
+  clear: function() {
+    process$ = process$.then(
+      () =>
+        new Promise(res => {
+          this.state = {};
+
+          localforage.setItem("state-db", this.state);
+          this.broadcast();
+          res(this.state);
+        })
+    );
+  },
   updateState: function(st) {
     process$ = process$.then(
       () =>
@@ -71,8 +83,9 @@ export function useStore(extractor) {
   const updateState = st => {
     Store.updateState(st);
   };
+  const clear = () => {};
 
-  return [val, updateState];
+  return [val, updateState, clear];
 }
 
 export function useDb() {

@@ -3,6 +3,7 @@ import React, { useState, Suspense } from "react";
 import { makeStyles } from "@material-ui/core";
 import Loading from "./Loading";
 import { useStates, useDb } from "./hooks";
+import ErrorBoundary from "./ErrorBoundery";
 const StatesView = React.lazy(() => import("./StatesView"));
 
 const useStyles = makeStyles(theme => {
@@ -19,13 +20,15 @@ const App = React.memo(() => {
   if (!db) return null;
   return (
     <div className={classes.root}>
-      <Loading test={!!states}>
-        {nav || (
-          <Suspense fallback={<div></div>}>
-            <StatesView states={states} setNav={setNav} db={db} />
-          </Suspense>
-        )}
-      </Loading>
+      <ErrorBoundary>
+        <Loading test={!!states}>
+          {nav || (
+            <Suspense fallback={<div></div>}>
+              <StatesView states={states} setNav={setNav} db={db} />
+            </Suspense>
+          )}
+        </Loading>
+      </ErrorBoundary>
     </div>
   );
 });
