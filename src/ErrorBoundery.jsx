@@ -39,7 +39,13 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       // You can render any custom fallback UI
-      return <ClearCache didClearCache={this.didClearCache} />;
+      return (
+        <ClearCache
+          didClearCache={this.didClearCache}
+          error={this.state.error}
+          info={this.state.info}
+        />
+      );
     }
     return this.props.children;
   }
