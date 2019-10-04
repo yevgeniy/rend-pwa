@@ -67,6 +67,8 @@ const ClearCache = ({ didClearCache, error, info }) => {
       <Divider />
       <div style={{ padding: "5px 0" }}>Error: {error && error.toString()}</div>
       <Divider />
+      <div style={{ padding: "5px 0" }}>Error: {error && error.stack}</div>
+      <Divider />
       <div style={{ padding: "5px 0" }}>Info: {info && info.toString()}</div>
     </div>
   );
