@@ -1,36 +1,29 @@
 import React, { useRef, useState, useCallback, useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import clsx from "classnames";
-import MenuIcon from "@material-ui/icons/Menu";
+
 import NavigateNext from "@material-ui/icons/NavigateNext";
 import NavigateBefore from "@material-ui/icons/NavigateBefore";
 import LastPage from "@material-ui/icons/LastPage";
 import FirstPage from "@material-ui/icons/FirstPage";
-import More from "@material-ui/icons/More";
-import Renew from "@material-ui/icons/Autorenew";
+
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
 import BrockenImage from "@material-ui/icons/BrokenImage";
 import Drawer from "@material-ui/core/Drawer";
-import { AppBar, Toolbar, IconButton, Typography } from "@material-ui/core";
-import Loading from "./Loading";
-import StatesView from "./StatesView";
-import ImgView from "./ImgView";
-import { useImagesSystem, useSelectedImage, useImageSrc } from "./hooksImages";
-import cats from "./cats";
+import { Toolbar, IconButton, Typography } from "@material-ui/core";
+import Loading from "../Loading";
+import StatesView from "../StatesView";
+import ImgView from "../ImgView";
+import { useImagesSystem, useSelectedImage, useImageSrc } from "../hooksImages";
+import cats from "../cats";
+import Header from "./Header";
 
 const useStyles = makeStyles(
   theme => {
     return {
       root: {},
-      appBar: {
-        transition: "all ease 500ms",
-        opacity: 1
-      },
-      hidden: {
-        opacity: 0,
-        pointerEvents: "none"
-      },
+
       imgsContainer: {
         textAlign: "center",
         marginTop: theme.spacing(8)
@@ -40,17 +33,8 @@ const useStyles = makeStyles(
         pointerEvents: "none"
       },
 
-      toolButton: {
-        marginRight: theme.spacing(1),
-        fontSize: 12,
-        color: theme.palette.common.white
-      },
       functionButton: {
         color: theme.palette.primary.dark
-      },
-      moreButton: {
-        position: "absolute",
-        right: 0
       }
     };
   },
@@ -96,47 +80,17 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
       });
   return (
     <div>
-      <AppBar
-        position="fixed"
-        className={clsx(classes.appBar, {
-          [classes.hidden]: !!selectedImage
-        })}
-      >
-        <Toolbar>
-          <IconButton
-            edge="start"
-            className={classes.toolButton}
-            color="inherit"
-            onClick={doOpenDrawer}
-          >
-            <MenuIcon />
-          </IconButton>
-          <IconButton
-            edge="start"
-            color="inherit"
-            className={classes.toolButton}
-            onClick={doPurge}
-          >
-            <BrockenImage />
-          </IconButton>
-          <IconButton
-            className={classes.toolButton}
-            edge="start"
-            color="inherit"
-            onClick={() => setPage(Math.min(currentPage + 1, totalPages - 1))}
-          >
-            {currentPage + 1} / {totalPages}
-            <NavigateNext />
-          </IconButton>
-          <IconButton
-            className={clsx(classes.toolButton, classes.moreButton)}
-            edge="end"
-            onClick={() => setIsFunctionOpen(true)}
-          >
-            <More />
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+      <Header
+        {...{
+          selectedImage,
+          doOpenDrawer,
+          doPurge,
+          currentPage,
+          totalPages,
+          setIsFunctionOpen,
+          setPage
+        }}
+      />
 
       <Loading test={!!imgs}>
         <div

@@ -21,7 +21,7 @@ const App = React.memo(() => {
     <div className={classes.root}>
       <Loading test={!!states}>
         {nav || (
-          <Suspense fallback={<div>loading</div>}>
+          <Suspense fallback={<div></div>}>
             <StatesView states={states} setNav={setNav} db={db} />
           </Suspense>
         )}
