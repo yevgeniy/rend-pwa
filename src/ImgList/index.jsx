@@ -6,12 +6,13 @@ import NavigateNext from "@material-ui/icons/NavigateNext";
 import NavigateBefore from "@material-ui/icons/NavigateBefore";
 import LastPage from "@material-ui/icons/LastPage";
 import FirstPage from "@material-ui/icons/FirstPage";
+import Flag from "@material-ui/icons/Flag";
 
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
 import BrockenImage from "@material-ui/icons/BrokenImage";
 import Drawer from "@material-ui/core/Drawer";
-import { Toolbar, IconButton, Typography } from "@material-ui/core";
+import { Toolbar, IconButton, Typography ,Divider,Button} from "@material-ui/core";
 import Loading from "../Loading";
 import StatesView from "../StatesView";
 import ImgView from "../ImgView";
@@ -31,6 +32,14 @@ const useStyles = makeStyles(
       isImgSelected: {
         overflow: "hidden",
         pointerEvents: "none"
+      },
+      markingButton: {
+        '& svg': {
+          marginRight:theme.spacing(1),
+        }
+      },
+      isMarking: {
+        color:'green',
       },
 
       functionButton: {
@@ -57,6 +66,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
   } = useSelectedImage();
   const [open, setOpen] = useState(false);
   const [isFunctionsOpen, setIsFunctionOpen] = useState(false);
+  const [isMarking, setIsMarking]=useState(false);
 
   const selectedImage = (imgs || []).find(v => v && v.id === selectedImageId);
 
@@ -64,8 +74,10 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
     setOpen(true);
   };
   const doSelectImage = useCallback(img => {
-    setSelectedImage(img.id);
-  }, []);
+    isMarking
+    ? updateImage(img.id, {marked:!img.marked})
+    : setSelectedImage(img.id);
+  }, [isMarking]);
   const doPurge = () => {
     Array.from(brokenLinksRef.current).forEach(deleteImage);
     brokenLinksRef.current = new Set();
@@ -79,7 +91,7 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
   //       v.reg = cats[i % cats.length].reg;
   //     });
   return (
-    <div>
+    <div className={classes.root}>
       <Header
         {...{
           selectedImage,
@@ -149,6 +161,15 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
           >
             <LastPage />
           </IconButton>
+        </Toolbar>
+        <Divider />
+        <Toolbar>
+          <Button className={clsx(classes.markingButton,{
+            [classes.isMarking]:isMarking
+          }) } onClick={()=>setIsMarking(!isMarking)}>
+            <Flag />
+            {isMarking ? 'End Marking' : 'Start Marking'}
+          </Button>
         </Toolbar>
       </Drawer>
     </div>
