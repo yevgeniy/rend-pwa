@@ -21,10 +21,10 @@ class ErrorBoundary extends React.Component {
     this.t = setTimeout(() => {
       console.log("cleared");
       this.c = 0;
-    }, 1000);
+    }, 800);
 
     this.c++;
-    if (this.c === 5) {
+    if (this.c === 10) {
       this.setState({ hasError: true });
       this.c = 0;
     }
@@ -39,7 +39,6 @@ class ErrorBoundary extends React.Component {
 
   render() {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return (
         <ClearCache
           didClearCache={this.didClearCache}
@@ -63,6 +62,9 @@ const ClearCache = ({ didClearCache, error, info }) => {
       <div style={{ padding: "5px 0" }}>
         <Button variant="contained" color="primary" onClick={doClearCashe}>
           Clear Cache
+        </Button>
+        <Button variant="contained" color="default" onClick={didClearCache}>
+          Cancel
         </Button>
       </div>
       <Divider />
