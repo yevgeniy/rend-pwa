@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core";
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
 import ImgList from "./ImgList";
-import { useSelectedState } from "./hooks";
 
 const useStyles = makeStyles(
   theme => {
@@ -16,23 +15,13 @@ const useStyles = makeStyles(
   { name: "StatesView" }
 );
 
-const StatesView = React.memo(({ states, setNav, db }) => {
+const StatesView = React.memo(({ states, setSelectedState, db }) => {
   const classes = useStyles();
-  const [opacity, setOpacity] = useState(0);
-  const { selectedState, setSelectedState } = useSelectedState();
-  useEffect(() => {
-    const t = setTimeout(() => setOpacity(1), 100);
-    return () => clearTimeout(t);
-  });
-  useEffect(() => {
-    if (!selectedState) return;
-    setNav(
-      <ImgList state={selectedState} db={db} setNav={setNav} states={states} />
-    );
-  }, [selectedState, setNav]);
+
+  if (!states) return null;
 
   return (
-    <div className={classes.root} style={{ opacity: opacity }}>
+    <div className={classes.root}>
       <List component="nav">
         <ListItem button onClick={() => setSelectedState("__MARKED__")}>
           <ListItemText primary="Marked" />

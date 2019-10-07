@@ -12,13 +12,20 @@ import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
 import BrockenImage from "@material-ui/icons/BrokenImage";
 import Drawer from "@material-ui/core/Drawer";
-import { Toolbar, IconButton, Typography ,Divider,Button} from "@material-ui/core";
+import {
+  Toolbar,
+  IconButton,
+  Typography,
+  Divider,
+  Button
+} from "@material-ui/core";
 import Loading from "../Loading";
-import StatesView from "../StatesView";
+
 import ImgView from "../ImgView";
 import { useImagesSystem, useSelectedImage, useImageSrc } from "../hooksImages";
 import cats from "../cats";
 import Header from "./Header";
+const StatesView = React.lazy(() => import("../StatesView"));
 
 const useStyles = makeStyles(
   theme => {
@@ -34,12 +41,12 @@ const useStyles = makeStyles(
         pointerEvents: "none"
       },
       markingButton: {
-        '& svg': {
-          marginRight:theme.spacing(1),
+        "& svg": {
+          marginRight: theme.spacing(1)
         }
       },
       isMarking: {
-        color:'green',
+        color: "green"
       },
 
       functionButton: {
@@ -49,7 +56,7 @@ const useStyles = makeStyles(
   },
   { name: "ImgList" }
 );
-const ImgList = React.memo(({ state, db, states, setNav }) => {
+const ImgList = React.memo(({ state, db, states, setSelectedState }) => {
   const classes = useStyles();
   const brokenLinksRef = useRef(new Set());
   let {
@@ -66,30 +73,36 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
   } = useSelectedImage();
   const [open, setOpen] = useState(false);
   const [isFunctionsOpen, setIsFunctionOpen] = useState(false);
-  const [isMarking, setIsMarking]=useState(false);
+  const [isMarking, setIsMarking] = useState(false);
 
   const selectedImage = (imgs || []).find(v => v && v.id === selectedImageId);
 
   const doOpenDrawer = () => {
     setOpen(true);
   };
-  const doSelectImage = useCallback(img => {
-    isMarking
-    ? updateImage(img.id, {marked:!img.marked})
-    : setSelectedImage(img.id);
-  }, [isMarking]);
+  const doSelectImage = useCallback(
+    img => {
+      isMarking
+        ? updateImage(img.id, { marked: !img.marked })
+        : setSelectedImage(img.id);
+    },
+    [isMarking]
+  );
   const doPurge = () => {
     Array.from(brokenLinksRef.current).forEach(deleteImage);
     brokenLinksRef.current = new Set();
   };
 
-  // /* show safe cats :D */
-  // if (window.location.href.match("localhost"))
-  //   if (imgs)
-  //     imgs.forEach((v, i) => {
-  //       v.thumb = cats[i % cats.length].thumb;
-  //       v.reg = cats[i % cats.length].reg;
-  //     });
+  /* show safe cats :D */
+  if (window.location.href.match("localhost"))
+    if (imgs)
+      imgs.forEach((v, i) => {
+        v.thumb = cats[i % cats.length].thumb;
+        v.reg = cats[i % cats.length].reg;
+      });
+
+  if (!imgs) return <div>loading images</div>;
+
   return (
     <div className={classes.root}>
       <Header
@@ -104,29 +117,34 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
         }}
       />
 
-      <Loading test={!!imgs}>
-        <div
-          className={clsx(classes.imgsContainer, {
-            [classes.isImgSelected]: selectedImage
-          })}
-        >
-          {(imgs || []).map(img => {
-            return (
-              <Img
-                key={img.id}
-                doSelectImage={doSelectImage}
-                brokenLinksRef={brokenLinksRef}
-                {...img}
-              />
-            );
-          })}
-        </div>
-      </Loading>
+      <div
+        className={clsx(classes.imgsContainer, {
+          [classes.isImgSelected]: selectedImage
+        })}
+      >
+        {(imgs || []).map(img => {
+          return (
+            <Img
+              key={img.id}
+              doSelectImage={doSelectImage}
+              brokenLinksRef={brokenLinksRef}
+              {...img}
+            />
+          );
+        })}
+      </div>
+
       {selectedImage ? (
         <ImgView {...{ img: selectedImage, updateImage, setSelectedImage }} />
       ) : null}
       <Drawer open={open} onClose={() => setOpen(false)}>
-        <StatesView db={db} states={states} setNav={setNav} />
+        <React.Suspense fallback={<div></div>}>
+          <StatesView
+            db={db}
+            states={states}
+            setSelectedState={setSelectedState}
+          />
+        </React.Suspense>
       </Drawer>
       <Drawer
         open={isFunctionsOpen}
@@ -164,11 +182,14 @@ const ImgList = React.memo(({ state, db, states, setNav }) => {
         </Toolbar>
         <Divider />
         <Toolbar>
-          <Button className={clsx(classes.markingButton,{
-            [classes.isMarking]:isMarking
-          }) } onClick={()=>setIsMarking(!isMarking)}>
+          <Button
+            className={clsx(classes.markingButton, {
+              [classes.isMarking]: isMarking
+            })}
+            onClick={() => setIsMarking(!isMarking)}
+          >
             <Flag />
-            {isMarking ? 'End Marking' : 'Start Marking'}
+            {isMarking ? "End Marking" : "Start Marking"}
           </Button>
         </Toolbar>
       </Drawer>
