@@ -119,8 +119,7 @@ const ImgList = React.memo(({ state, db, states, setSelectedState }) => {
           states,
           setSelectedState,
           open,
-          setOpen,
-          isMarking
+          setOpen
         }}
       />
 
@@ -131,6 +130,7 @@ const ImgList = React.memo(({ state, db, states, setSelectedState }) => {
           setPage,
           currentPage,
           totalPages,
+          isMarking,
           setIsMarking
         }}
       />
