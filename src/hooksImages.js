@@ -132,9 +132,12 @@ function useImages(imageIds, db, selectedState) {
 
   const updateImage = async (id, props) => {
     await db.collection("images").updateOne({ id: id }, { $set: props });
-    var i = images.findIndex(v => v.id === id);
-    images[i] = { ...images[i], ...props };
-    updateState({ images: [...images] });
+    updateState(images => {
+      var i = images.findIndex(v => v.id === id);
+      if (i === -1) return images;
+      images[i] = { ...images[i], ...props };
+      return { images: [...images] };
+    });
   };
 
   return { images, updateImage };
