@@ -57,16 +57,12 @@ function useShuffledImageIds(imageIds, selectedState) {
   return imgs;
 }
 function usePages(imageIds, selectedState) {
-  const [currentPage, updateState_currentPage] = useStore(({ currentPage }) =>
-    Math.max(0, currentPage || 0)
+  const [pageIds, updateState_pageIds] = useStore(s => s.pageIds);
+  const [currentPage, updateState_currentPage] = useStore(s =>
+    Math.max(0, s.currentPage || 0)
   );
-  const [totalPages, updateState_totalPages] = useStore(
-    ({ totalPages }) => totalPages
-  );
-  const [pageSize, updateState_pageSize] = useStore(
-    ({ pageSize }) => pageSize || 20
-  );
-  const [idsForPage, setIdsForPage] = useState(null);
+  const [totalPages, updateState_totalPages] = useStore(s => s.totalPages);
+  const [pageSize, updateState_pageSize] = useStore(s => s.pageSize || 20);
 
   useUpdate(() => {
     if (!selectedState) return;
@@ -87,11 +83,11 @@ function usePages(imageIds, selectedState) {
 
   useEffect(() => {
     if (!imageIds) {
-      setIdsForPage(null);
+      updateState_pageIds({ pageIds: null });
       return;
     }
     const pi = imageIds.slice(currentPage * pageSize).slice(0, pageSize);
-    setIdsForPage(pi);
+    updateState_pageIds({ pageIds: pi });
   }, [pageSize, totalPages, currentPage, imageIds]);
 
   const setPage = p => {
@@ -99,7 +95,7 @@ function usePages(imageIds, selectedState) {
   };
 
   return {
-    imageIds: idsForPage,
+    imageIds: pageIds,
     currentPage,
     totalPages,
     pageSize,
@@ -107,10 +103,10 @@ function usePages(imageIds, selectedState) {
   };
 }
 function useImages(imageIds, db, selectedState) {
-  const [images, updateState] = useStore(({ images }) => images);
+  const [images, setImages] = useState(null);
 
   useEffect(() => {
-    if (!selectedState) updateState({ images: null });
+    if (!selectedState) setImages(null);
   }, [selectedState]);
 
   useEffect(() => {
@@ -119,11 +115,9 @@ function useImages(imageIds, db, selectedState) {
     getImagesByIds(db, imageIds)
       .then(async res => {
         res = await removeDuplicates(res, db);
-        updateState({
-          images: imageIds
-            .map(id => res.find(v => id === v.id))
-            .filter(v => !!v)
-        });
+        setImages(
+          imageIds.map(id => res.find(v => id === v.id)).filter(v => !!v)
+        );
       })
       .catch(err => {
         throw err;
@@ -131,14 +125,14 @@ function useImages(imageIds, db, selectedState) {
   }, [db, imageIds]);
 
   const updateImage = async (id, props) => {
-    await db.collection("images").updateOne({ id: id }, { $set: props });
-    updateState(state => {
-      const images = state.images || [];
-      var i = images.findIndex(v => v.id === id);
-      if (i === -1) return images;
-      images[i] = { ...images[i], ...props };
-      return { images: [...images] };
-    });
+    // await db.collection("images").updateOne({ id: id }, { $set: props });
+    // updateState(state => {
+    //   const images = state.images || [];
+    //   var i = images.findIndex(v => v.id === id);
+    //   if (i === -1) return images;
+    //   images[i] = { ...images[i], ...props };
+    //   return { images: [...images] };
+    // });
   };
 
   return { images, updateImage };
