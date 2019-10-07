@@ -62,6 +62,13 @@ const Store = {
           st = st && st.constructor === Function ? st(this.state) : st;
           this.state = { ...this.state, ...st };
 
+          const todelete = [];
+          for (let i in this.state)
+            if (this.state[i] === undefined) todelete.push(i);
+          todelete.forEach(v => {
+            delete this.state[v];
+          });
+
           localforage.setItem("state-db", this.state);
           this.broadcast();
           res(this.state);

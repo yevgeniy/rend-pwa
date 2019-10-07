@@ -94,9 +94,25 @@ export async function getMarkedImageIds(db) {
   return imageIds;
 }
 export async function getImagesByIds(db, imageIds) {
+  console.log("getting images", imageIds);
   const images = await db
     .collection("images")
     .find({ id: { $in: imageIds } })
     .toArray();
   return images;
 }
+// let _t;
+// let _idbuffer = [];
+// export function getImage(db, id) {
+//   return new Promise(res => {
+//     _idbuffer.push(id);
+//     clearTimeout(_t);
+//     _t = setTimeout(() => {
+//       _idbuffer = [];
+//       getImagesByIds(db, _idbuffer).then(imgs => {
+//         const img = imgs.find(v => v.id === id);
+//         res(img);
+//       });
+//     }, 500);
+//   });
+// }
