@@ -21,10 +21,10 @@ class ErrorBoundary extends React.Component {
     this.t = setTimeout(() => {
       console.log("cleared");
       this.c = 0;
-    }, 800);
+    }, 1000);
 
     this.c++;
-    if (this.c === 10) {
+    if (this.c === 8) {
       this.setState({ hasError: true });
       this.c = 0;
     }

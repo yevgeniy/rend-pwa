@@ -103,10 +103,10 @@ function usePages(imageIds, selectedState) {
   };
 }
 function useImages(imageIds, db, selectedState) {
-  const [images, setImages] = useState(null);
+  const [images, updateState] = useStore(s => s.images);
 
   useEffect(() => {
-    if (!selectedState) setImages(null);
+    if (!selectedState) updateState({ images: null });
   }, [selectedState]);
 
   useEffect(() => {
@@ -115,9 +115,11 @@ function useImages(imageIds, db, selectedState) {
     getImagesByIds(db, imageIds)
       .then(async res => {
         res = await removeDuplicates(res, db);
-        setImages(
-          imageIds.map(id => res.find(v => id === v.id)).filter(v => !!v)
-        );
+        updateState({
+          images: imageIds
+            .map(id => res.find(v => id === v.id))
+            .filter(v => !!v)
+        });
       })
       .catch(err => {
         throw err;
@@ -125,14 +127,14 @@ function useImages(imageIds, db, selectedState) {
   }, [db, imageIds]);
 
   const updateImage = async (id, props) => {
-    // await db.collection("images").updateOne({ id: id }, { $set: props });
-    // updateState(state => {
-    //   const images = state.images || [];
-    //   var i = images.findIndex(v => v.id === id);
-    //   if (i === -1) return images;
-    //   images[i] = { ...images[i], ...props };
-    //   return { images: [...images] };
-    // });
+    const i = images.findIndex(v => v.id === id);
+    images[i] = { ...images[i], ...props };
+    updateState({ images: [...images] });
+
+    await db
+      .collection("images")
+      .updateOne({ id: id }, { $set: props })
+      .catch(e => alert("failed to update image"));
   };
 
   return { images, updateImage };
