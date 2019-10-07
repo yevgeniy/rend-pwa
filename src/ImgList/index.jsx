@@ -9,7 +9,6 @@ import Header from "./Header";
 import StateSelectMenu from "./StateSelectMenu";
 import ControlMenu from "./ControlMenu";
 import Img from "./Img";
-const StatesView = React.lazy(() => import("../StatesView"));
 
 const useStyles = makeStyles(
   theme => {
