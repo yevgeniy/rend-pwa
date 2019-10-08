@@ -31,65 +31,67 @@ const useStyles = makeStyles(theme => {
   };
 });
 
-const ControlMenu = ({
-  isFunctionsOpen,
-  setIsFunctionOpen,
-  setPage,
-  currentPage,
-  totalPages,
-  isMarking,
-  setIsMarking
-}) => {
-  const classes = useStyles();
-  return (
-    <Drawer
-      open={isFunctionsOpen}
-      onClose={() => setIsFunctionOpen(false)}
-      anchor="top"
-    >
-      <Toolbar>
-        <IconButton
-          className={classes.functionButton}
-          onClick={() => setPage(0)}
-        >
-          <FirstPage />
-        </IconButton>
-        <IconButton
-          className={classes.functionButton}
-          onClick={() => setPage(Math.max(0, currentPage - 1))}
-        >
-          <NavigateBefore />
-        </IconButton>
-        <Typography color="primary">
-          {currentPage + 1} / {totalPages}
-        </Typography>
-        <IconButton
-          className={classes.functionButton}
-          onClick={() => setPage(Math.min(currentPage + 1, totalPages - 1))}
-        >
-          <NavigateNext />
-        </IconButton>
-        <IconButton
-          className={classes.functionButton}
-          onClick={() => setPage(totalPages - 1)}
-        >
-          <LastPage />
-        </IconButton>
-      </Toolbar>
-      <Divider />
-      <Toolbar>
-        <Button
-          className={clsx(classes.markingButton, {
-            [classes.isMarking]: isMarking
-          })}
-          onClick={() => setIsMarking(!isMarking)}
-        >
-          <Flag />
-          {isMarking ? "End Marking" : "Start Marking"}
-        </Button>
-      </Toolbar>
-    </Drawer>
-  );
-};
+const ControlMenu = React.memo(
+  ({
+    isFunctionsOpen,
+    setIsFunctionOpen,
+    setPage,
+    currentPage,
+    totalPages,
+    isMarking,
+    setIsMarking
+  }) => {
+    const classes = useStyles();
+    return (
+      <Drawer
+        open={isFunctionsOpen}
+        onClose={() => setIsFunctionOpen(false)}
+        anchor="top"
+      >
+        <Toolbar>
+          <IconButton
+            className={classes.functionButton}
+            onClick={() => setPage(0)}
+          >
+            <FirstPage />
+          </IconButton>
+          <IconButton
+            className={classes.functionButton}
+            onClick={() => setPage(Math.max(0, currentPage - 1))}
+          >
+            <NavigateBefore />
+          </IconButton>
+          <Typography color="primary">
+            {currentPage + 1} / {totalPages}
+          </Typography>
+          <IconButton
+            className={classes.functionButton}
+            onClick={() => setPage(Math.min(currentPage + 1, totalPages - 1))}
+          >
+            <NavigateNext />
+          </IconButton>
+          <IconButton
+            className={classes.functionButton}
+            onClick={() => setPage(totalPages - 1)}
+          >
+            <LastPage />
+          </IconButton>
+        </Toolbar>
+        <Divider />
+        <Toolbar>
+          <Button
+            className={clsx(classes.markingButton, {
+              [classes.isMarking]: isMarking
+            })}
+            onClick={() => setIsMarking(!isMarking)}
+          >
+            <Flag />
+            {isMarking ? "End Marking" : "Start Marking"}
+          </Button>
+        </Toolbar>
+      </Drawer>
+    );
+  }
+);
 
 export default ControlMenu;
