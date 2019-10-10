@@ -1,11 +1,4 @@
-import React, {
-  useMemo,
-  useRef,
-  useState,
-  useEffect,
-  useContext,
-  useCallback
-} from "react";
+import React, { useMemo, useRef, useState, useEffect } from "react";
 import localforage from "localforage";
 import {
   Stitch,
