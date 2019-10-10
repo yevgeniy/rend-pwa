@@ -8,7 +8,6 @@ import {
   shuffle,
   removeDuplicates
 } from "./services";
-import { dim } from "ansi-colors";
 
 function useDrawingImageIds(db, selectedState) {
   const [imageIds] = useMemoState(() => {
@@ -165,12 +164,14 @@ export function useImagesSystem(db) {
 
   const deleteImage = async id => {
     if (!imageIds) return;
-    await db.collection("images").deleteOne({ id });
-
     imageIds &&
       setImageIds(imageIds => {
         return imageIds.filter(v => v !== id);
       });
+    await db
+      .collection("images")
+      .deleteOne({ id })
+      .catch(() => alert("problem deleting image"));
   };
   return {
     images,
