@@ -184,11 +184,9 @@ export function useImagesSystem(db) {
   };
 }
 export function useSelectedImage() {
-  let [selectedImage, updateState] = useStore(({ selectedImage }) => {
-    if (selectedImage && selectedImage.constructor === Number)
-      return selectedImage;
-    return null;
-  });
+  let [selectedImage, updateState] = useStore(
+    ({ selectedImage }) => selectedImage
+  );
 
   const setSelectedImage = selectedImage => {
     updateState({ selectedImage });
