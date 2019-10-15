@@ -56,14 +56,11 @@ const ImgList = React.memo(({ state, db, states, setSelectedState }) => {
 
   const selectedImage = (imgs || []).find(v => v && v.id === selectedImageId);
 
-  const doSelectImage = useCallback(
-    img => {
-      isMarking
-        ? updateImage(img.id, { marked: !img.marked })
-        : setSelectedImage(img.id);
-    },
-    [isMarking]
-  );
+  const doSelectImage = img => {
+    isMarking
+      ? updateImage(img.id, { marked: !img.marked })
+      : setSelectedImage(img.id);
+  };
   const doPurge = () => {
     Array.from(brokenLinksRef.current).forEach(deleteImage);
     brokenLinksRef.current = new Set();
