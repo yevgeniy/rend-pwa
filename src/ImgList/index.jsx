@@ -35,104 +35,107 @@ const useStyles = makeStyles(
   },
   { name: "ImgList" }
 );
-const ImgList = React.memo(({ state, db, states, setSelectedState }) => {
-  const classes = useStyles();
-  const brokenLinksRef = useRef(new Set());
-  let {
-    images: imgs,
-    updateImage,
-    deleteImage,
-    totalPages,
-    currentPage,
-    setPage
-  } = useImagesSystem(db, state);
-  const {
-    selectedImage: selectedImageId,
-    setSelectedImage
-  } = useSelectedImage();
-  const [open, setOpen] = useState(false);
-  const [isFunctionsOpen, setIsFunctionOpen] = useState(false);
-  const [isMarking, setIsMarking] = useState(false);
+const ImgList = React.memo(
+  ({ selectedState, db, states, setSelectedState }) => {
+    const classes = useStyles();
+    const brokenLinksRef = useRef(new Set());
+    let {
+      images: imgs,
+      updateImage,
+      deleteImage,
+      totalPages,
+      currentPage,
+      setPage
+    } = useImagesSystem(db, selectedState);
+    const {
+      selectedImage: selectedImageId,
+      setSelectedImage
+    } = useSelectedImage();
+    const [open, setOpen] = useState(false);
+    const [isFunctionsOpen, setIsFunctionOpen] = useState(false);
+    const [isMarking, setIsMarking] = useState(false);
 
-  const selectedImage = (imgs || []).find(v => v && v.id === selectedImageId);
+    const selectedImage = (imgs || []).find(v => v && v.id === selectedImageId);
 
-  const doSelectImage = img => {
-    isMarking
-      ? updateImage(img.id, { marked: !img.marked })
-      : setSelectedImage(img.id);
-  };
-  const doPurge = () => {
-    Array.from(brokenLinksRef.current).forEach(deleteImage);
-    brokenLinksRef.current = new Set();
-  };
+    const doSelectImage = img => {
+      isMarking
+        ? updateImage(img.id, { marked: !img.marked })
+        : setSelectedImage(img.id);
+    };
+    const doPurge = () => {
+      Array.from(brokenLinksRef.current).forEach(deleteImage);
+      brokenLinksRef.current = new Set();
+    };
 
-  // /* show safe cats :D */
-  // if (window.location.href.match("localhost"))
-  //   if (imgs)
-  //     imgs.forEach((v, i) => {
-  //       v.thumb = cats[i % cats.length].thumb;
-  //       v.reg = cats[i % cats.length].reg;
-  //     });
+    // /* show safe cats :D */
+    // if (window.location.href.match("localhost"))
+    //   if (imgs)
+    //     imgs.forEach((v, i) => {
+    //       v.thumb = cats[i % cats.length].thumb;
+    //       v.reg = cats[i % cats.length].reg;
+    //     });
 
-  if (!imgs) return <div>loading images</div>;
+    if (!imgs) return <div>loading images</div>;
 
-  return (
-    <div className={classes.root}>
-      <Header
-        {...{
-          selectedImage,
-          doOpenDrawer: () => setOpen(true),
-          doPurge,
-          currentPage,
-          totalPages,
-          setIsFunctionOpen,
-          setPage
-        }}
-      />
+    return (
+      <div className={classes.root}>
+        <Header
+          {...{
+            selectedImage,
+            doOpenDrawer: () => setOpen(true),
+            doPurge,
+            currentPage,
+            totalPages,
+            setIsFunctionOpen,
+            setPage
+          }}
+        />
 
-      <div
-        className={clsx(classes.imgsContainer, {
-          [classes.isImgSelected]: selectedImage
-        })}
-      >
-        {(imgs || []).map(img => {
-          return (
-            <Img
-              key={img.id}
-              doSelectImage={doSelectImage}
-              brokenLinksRef={brokenLinksRef}
-              {...img}
-            />
-          );
-        })}
+        <div
+          className={clsx(classes.imgsContainer, {
+            [classes.isImgSelected]: selectedImage
+          })}
+        >
+          {(imgs || []).map(img => {
+            return (
+              <Img
+                key={img.id}
+                doSelectImage={doSelectImage}
+                brokenLinksRef={brokenLinksRef}
+                {...img}
+              />
+            );
+          })}
+        </div>
+
+        {selectedImage && (
+          <ImgView {...{ img: selectedImage, updateImage, setSelectedImage }} />
+        )}
+        <StateSelectMenu
+          {...{
+            db,
+            states,
+            setSelectedState,
+            selectedState: selectedState,
+            open,
+            setOpen
+          }}
+        />
+
+        <ControlMenu
+          {...{
+            isFunctionsOpen,
+            setIsFunctionOpen,
+            setPage,
+            currentPage,
+            totalPages,
+            isMarking,
+            setIsMarking
+          }}
+        />
       </div>
-
-      {selectedImage && (
-        <ImgView {...{ img: selectedImage, updateImage, setSelectedImage }} />
-      )}
-      <StateSelectMenu
-        {...{
-          db,
-          states,
-          setSelectedState,
-          open,
-          setOpen
-        }}
-      />
-
-      <ControlMenu
-        {...{
-          isFunctionsOpen,
-          setIsFunctionOpen,
-          setPage,
-          currentPage,
-          totalPages,
-          isMarking,
-          setIsMarking
-        }}
-      />
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default ImgList;

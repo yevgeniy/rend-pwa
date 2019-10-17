@@ -27,7 +27,7 @@ const App = React.memo(() => {
       <ErrorBoundary>
         {!selectedState ? (
           <Suspense fallback={<div></div>}>
-            <StatesView {...{ states, setSelectedState, db }} />
+            <StatesView {...{ states, setSelectedState, selectedState, db }} />
           </Suspense>
         ) : (
           <ImgList {...{ setSelectedState, selectedState, db, states }} />
