@@ -3,6 +3,7 @@ import clsx from "clsx";
 import Done from "@material-ui/icons/Done";
 import Create from "@material-ui/icons/Create";
 import BrockenImage from "@material-ui/icons/BrokenImage";
+import orange from "@material-ui/core/colors/orange";
 
 import { makeStyles } from "@material-ui/core";
 import { useImageSrc } from "../hooksImages";
@@ -16,6 +17,9 @@ const useIconsContainerStyles = makeStyles(
       },
       drawingIconsContainer: {
         background: theme.palette.primary.dark
+      },
+      drawnIconsContainer: {
+        background: orange[600]
       },
       drawingIcon: {
         color: theme.palette.primary.dark.contrastText
@@ -35,7 +39,8 @@ const IconsContainer = React.memo(img => {
     return (
       <div
         className={clsx(classes.root, {
-          [classes.drawingIconsContainer]: img.drawing
+          [classes.drawingIconsContainer]: img.drawing,
+          [classes.drawnIconsContainer]: img.drawn
         })}
       >
         {img.marked ? (
