@@ -36,7 +36,15 @@ const useStyles = makeStyles(
   { name: "ImgList" }
 );
 const ImgList = React.memo(
-  ({ selectedState, db, states, setSelectedState }) => {
+  ({
+    selectedState,
+    db,
+    states,
+    setSelectedState,
+    users,
+    selectedUser,
+    setSelectedUser
+  }) => {
     const classes = useStyles();
     const brokenLinksRef = useRef(new Set());
     let {
@@ -118,7 +126,10 @@ const ImgList = React.memo(
             setSelectedState,
             selectedState: selectedState,
             open,
-            setOpen
+            setOpen,
+            users,
+            selectedUser,
+            setSelectedUser
           }}
         />
 

@@ -1,7 +1,14 @@
 import { useState, useEffect, useMemo, useRef } from "react";
-import { useMemoState, useUpdate, useStore, useSelectedState } from "./hooks";
+import {
+  useMemoState,
+  useUpdate,
+  useStore,
+  useSelectedState,
+  useSelectedUser
+} from "./hooks";
 import {
   getStateImageIds,
+  getUserImageIds,
   getMarkedImageIds,
   getImagesByIds,
   getDrawingImageIds,
@@ -21,13 +28,18 @@ function useDrawingImageIds(db, selectedState) {
   return imageIds;
 }
 
-function useImageIds(db, selectedState) {
+function useImageIds(db, selectedState, selectedUser) {
+  console.log(selectedState, selectedUser);
+
   const [imageIds] = useMemoState(() => {
-    if (!selectedState) return;
     if (selectedState === "__MARKED__")
       return getMarkedImageIds(db).then(v => v.sort());
-    else return getStateImageIds(db, selectedState).then(v => v.sort());
-  }, [selectedState, db]);
+    else if (selectedState)
+      return getStateImageIds(db, selectedState).then(v => v.sort());
+    else if (selectedUser) {
+      return getUserImageIds(db, selectedUser).then(v => v.sort());
+    }
+  }, [selectedState, selectedUser, db]);
 
   const shuffledImageIds = useShuffledImageIds(imageIds, selectedState);
   return shuffledImageIds;
@@ -140,7 +152,9 @@ function useImages(imageIds, db, selectedState) {
 }
 export function useImagesSystem(db) {
   const { selectedState } = useSelectedState();
-  const allimageids = useImageIds(db, selectedState);
+  const { selectedUser } = useSelectedUser();
+  const allimageids = useImageIds(db, selectedState, selectedUser);
+  console.log("AAAAA", allimageids);
 
   const drawingimageids = useDrawingImageIds(db, selectedState);
 
@@ -160,7 +174,6 @@ export function useImagesSystem(db) {
   } = usePages(imageIds, selectedState);
 
   const { images, updateImage } = useImages(pageimageids, db, selectedState);
-  console.log("a", images);
 
   const deleteImage = async id => {
     if (!imageIds) return;

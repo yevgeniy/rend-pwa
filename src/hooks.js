@@ -5,7 +5,7 @@ import {
   RemoteMongoClient,
   UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
-import { getStates } from "./services";
+import { getStates, getUsers } from "./services";
 var Client = Stitch.initializeDefaultAppClient("rend-app-nczgz");
 const Mongodb = Client.getServiceClient(
   RemoteMongoClient.factory,
@@ -120,6 +120,21 @@ export function useStates() {
 
   return states;
 }
+export function useUsers() {
+  const db = useDb();
+  const [users, updateState] = useStore(({ users }) => {
+    return users;
+  });
+  useEffect(() => {
+    if (!db) return;
+    if (users) return;
+    getUsers(db)
+      .then(users => updateState({ users }))
+      .catch(e => console.log(e));
+  }, [db, users]);
+
+  return users;
+}
 
 export function useSelectedState() {
   const [selectedState, updateState] = useStore(
@@ -128,10 +143,24 @@ export function useSelectedState() {
 
   const setSelectedState = selectedState => {
     updateState({
-      selectedState
+      selectedState,
+      selectedUser: null
     });
   };
   return { selectedState, setSelectedState };
+}
+export function useSelectedUser() {
+  const [selectedUser, updateState] = useStore(
+    ({ selectedUser }) => selectedUser
+  );
+
+  const setSelectedUser = selectedUser => {
+    updateState({
+      selectedUser,
+      selectedState: null
+    });
+  };
+  return { selectedUser, setSelectedUser };
 }
 
 export function useUpdate(fn, args) {

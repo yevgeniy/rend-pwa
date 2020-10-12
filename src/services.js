@@ -47,6 +47,26 @@ export async function getStates(db) {
   if (err) throw err;
   return res.sort((a, b) => (a >= b ? 1 : -1));
 }
+export async function getUsers(db) {
+  var [err, res] = await new Promise(async res => {
+    var r = await db
+      .collection("images")
+      .aggregate([{ $group: { _id: "$username" } }])
+      .toArray()
+      .catch(e => res[(e, null)]);
+    res([
+      null,
+      r
+        .map(v => {
+          return v._id;
+        })
+        .filter(v => v)
+    ]);
+  });
+
+  if (err) throw err;
+  return res.sort((a, b) => (a >= b ? 1 : -1));
+}
 
 export async function getStateImages(db, state) {
   let images = await db
@@ -59,6 +79,15 @@ export async function getStateImageIds(db, state) {
   const imageIds = await db
     .collection("images")
     .aggregate([{ $match: { datetime: state } }, { $group: { _id: "$id" } }])
+    .toArray()
+    .then(res => res.map(v => v._id));
+  return imageIds;
+}
+
+export async function getUserImageIds(db, user) {
+  const imageIds = await db
+    .collection("images")
+    .aggregate([{ $match: { username: user } }, { $group: { _id: "$id" } }])
     .toArray()
     .then(res => res.map(v => v._id));
   return imageIds;

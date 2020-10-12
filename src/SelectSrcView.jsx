@@ -16,17 +16,35 @@ const useStyles = makeStyles(
       }
     };
   },
-  { name: "StatesView" }
+  { name: "SelectSrcView" }
 );
 
-const StatesView = React.memo(
-  ({ states, setSelectedState, selectedState, db }) => {
+const SelectSrcView = React.memo(
+  ({
+    states,
+    setSelectedState,
+    selectedState,
+    selectedUser,
+    users,
+    setSelectedUser,
+    db
+  }) => {
     const classes = useStyles();
+    const [src, setsrc] = useState(selectedState ? "states" : "users");
 
     if (!states) return null;
 
     return (
       <div className={classes.root}>
+        <List component="nav">
+          <ListItem
+            button
+            onClick={() => setsrc(src === "states" ? "users" : "states")}
+          >
+            <ListItemText primary={src === "states" ? "states" : "users"} />
+          </ListItem>
+        </List>
+        <Divider />
         <List component="nav">
           <ListItem button onClick={() => setSelectedState("__MARKED__")}>
             <ListItemText
@@ -38,13 +56,21 @@ const StatesView = React.memo(
           </ListItem>
         </List>
         <Divider />
+
         <List component="nav">
-          {states.map(v => {
+          {(src === "states" ? states : users).map(v => {
             return (
-              <ListItem key={v} button onClick={() => setSelectedState(v)}>
+              <ListItem
+                key={v}
+                button
+                onClick={() =>
+                  src === "states" ? setSelectedState(v) : setSelectedUser(v)
+                }
+              >
                 <ListItemText
                   className={clsx({
-                    [classes.selectedState]: v === selectedState
+                    [classes.selectedState]:
+                      (v === src) === "states" ? selectedState : selectedUser
                   })}
                   primary={v}
                 />
@@ -57,4 +83,4 @@ const StatesView = React.memo(
   }
 );
 
-export default StatesView;
+export default SelectSrcView;
