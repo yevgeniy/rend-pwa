@@ -1,10 +1,10 @@
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import clsx from "classnames";
 
 import ImgView from "../ImgView";
 import { useImagesSystem, useSelectedImage } from "../hooksImages";
-import cats from "../cats";
+//import cats from "../cats";
 import Header from "./Header";
 import StateSelectMenu from "./StateSelectMenu";
 import ControlMenu from "./ControlMenu";

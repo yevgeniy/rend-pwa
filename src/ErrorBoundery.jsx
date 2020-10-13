@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Divider, makeStyles } from "@material-ui/core";
+import { Button, Divider } from "@material-ui/core";
 import { useStore } from "./hooks";
 
 class ErrorBoundary extends React.Component {

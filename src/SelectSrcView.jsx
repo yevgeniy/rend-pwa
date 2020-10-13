@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import clsx from "clsx";
 import { makeStyles } from "@material-ui/core";
 import { List, ListItem, ListItemText, Divider } from "@material-ui/core";
-import ImgList from "./ImgList";
 
 const useStyles = makeStyles(
   theme => {

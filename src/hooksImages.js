@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   useMemoState,
   useUpdate,
@@ -73,7 +73,7 @@ function usePages(imageIds, selectedState) {
     Math.max(0, s.currentPage || 0)
   );
   const [totalPages, updateState_totalPages] = useStore(s => s.totalPages);
-  const [pageSize, updateState_pageSize] = useStore(s => s.pageSize || 20);
+  const [pageSize] = useStore(s => s.pageSize || 20);
 
   useUpdate(() => {
     if (!selectedState) return;

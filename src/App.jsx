@@ -1,7 +1,6 @@
-import React, { useEffect, useState, Suspense } from "react";
+import React, { Suspense } from "react";
 
 import { makeStyles } from "@material-ui/core";
-import Loading from "./Loading";
 import {
   useStates,
   useUsers,
