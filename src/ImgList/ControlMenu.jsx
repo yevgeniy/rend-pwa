@@ -35,6 +35,7 @@ const ControlMenu = React.memo(
   ({
     isFunctionsOpen,
     setIsFunctionOpen,
+    name,
     setPage,
     currentPage,
     totalPages,
@@ -48,6 +49,10 @@ const ControlMenu = React.memo(
         onClose={() => setIsFunctionOpen(false)}
         anchor="top"
       >
+        <Toolbar>
+          <Typography variant="h6">{name}</Typography>
+        </Toolbar>
+        <Divider />
         <Toolbar>
           <IconButton
             className={classes.functionButton}

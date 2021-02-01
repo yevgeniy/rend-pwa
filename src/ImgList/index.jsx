@@ -135,6 +135,7 @@ const ImgList = React.memo(
 
         <ControlMenu
           {...{
+            name: selectedState || selectedUser,
             isFunctionsOpen,
             setIsFunctionOpen,
             setPage,

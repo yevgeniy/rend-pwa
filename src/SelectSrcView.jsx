@@ -11,7 +11,10 @@ const useStyles = makeStyles(
         transition: "ease all 500ms"
       },
       selectedState: {
-        color: theme.palette.primary.dark
+        color: theme.palette.primary.dark,
+        "& span": {
+          fontWeight: "bold"
+        }
       }
     };
   },
@@ -69,7 +72,7 @@ const SelectSrcView = React.memo(
                 <ListItemText
                   className={clsx({
                     [classes.selectedState]:
-                      (v === src) === "states" ? selectedState : selectedUser
+                      (src === "states" ? selectedState : selectedUser) === v
                   })}
                   primary={v}
                 />
