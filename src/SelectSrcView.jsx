@@ -114,36 +114,38 @@ function useSrc(
       ? setSelectedState
       : selectedUser
       ? setSelectedUser
-      : setSelectedCategory,
-    selected: selectedState || selectedUser || selectedCategory
+      : setSelectedCategory
   });
 
   const toggle = () => {
-    const { src } = data;
-    if (src === "state")
-      setdata({
-        src: "users",
-        labels: users,
-        doSelect: setSelectedUser,
-        selected: selectedUser
-      });
-    else if (src === "users")
-      setdata({
-        src: "categories",
-        labels: categories,
-        doSelect: setSelectedCategory,
-        selected: selectedCategory
-      });
-    else if (src === "categories")
-      setdata({
-        src: "states",
-        labels: states,
-        doSelect: setSelectedState,
-        selected: selectedState
-      });
+    setdata(data => {
+      const { src } = data;
+      if (src === "states")
+        return {
+          src: "users",
+          labels: users,
+          doSelect: setSelectedUser
+        };
+      else if (src === "users")
+        return {
+          src: "categories",
+          labels: categories,
+          doSelect: setSelectedCategory
+        };
+      else if (src === "categories")
+        return {
+          src: "states",
+          labels: states,
+          doSelect: setSelectedState
+        };
+    });
   };
 
-  return { ...data, toggle };
+  return {
+    ...data,
+    toggle,
+    selected: selectedState || selectedUser || selectedCategory
+  };
 }
 
 export default SelectSrcView;
