@@ -4,7 +4,8 @@ import {
   useUpdate,
   useStore,
   useSelectedState,
-  useSelectedUser
+  useSelectedUser,
+  useSelectedCategory
 } from "./hooks";
 import {
   getStateImageIds,
@@ -12,6 +13,7 @@ import {
   getMarkedImageIds,
   getImagesByIds,
   getDrawingImageIds,
+  getCategoryImageIds,
   shuffle,
   removeDuplicates
 } from "./services";
@@ -28,9 +30,7 @@ function useDrawingImageIds(db, selectedState) {
   return imageIds;
 }
 
-function useImageIds(db, selectedState, selectedUser) {
-  console.log(selectedState, selectedUser);
-
+function useImageIds(db, selectedState, selectedUser, selectedCategory) {
   const [imageIds] = useMemoState(() => {
     if (selectedState === "__MARKED__")
       return getMarkedImageIds(db).then(v => v.sort());
@@ -38,8 +38,10 @@ function useImageIds(db, selectedState, selectedUser) {
       return getStateImageIds(db, selectedState).then(v => v.sort());
     else if (selectedUser) {
       return getUserImageIds(db, selectedUser).then(v => v.sort());
+    } else if (selectedCategory) {
+      return getCategoryImageIds(db, selectedCategory).then(v => v.sort());
     }
-  }, [selectedState, selectedUser, db]);
+  }, [selectedState, selectedUser, selectedCategory, db]);
 
   const shuffledImageIds = useShuffledImageIds(imageIds, selectedState);
   return shuffledImageIds;
@@ -49,14 +51,12 @@ function useShuffledImageIds(imageIds, selectedState) {
   const [rand, updateState] = useStore(s => s.rand);
 
   const imgs = useMemo(() => {
-    console.log("RERUNNING RAND: ", !!rand);
     const res = rand && imageIds ? shuffle([...imageIds], rand) : imageIds;
     return res;
   }, [rand, imageIds]);
 
   useUpdate(() => {
     if (selectedState === "__MARKED__") {
-      console.log("NEW RAND");
       updateState({
         rand: new Array(10).fill(0, 0, 10).map(v => Math.random())
       });
@@ -153,8 +153,14 @@ function useImages(imageIds, db, selectedState) {
 export function useImagesSystem(db) {
   const { selectedState } = useSelectedState();
   const { selectedUser } = useSelectedUser();
-  const allimageids = useImageIds(db, selectedState, selectedUser);
-  console.log("AAAAA", allimageids);
+  const { selectedCategory } = useSelectedCategory();
+
+  const allimageids = useImageIds(
+    db,
+    selectedState,
+    selectedUser,
+    selectedCategory
+  );
 
   const drawingimageids = useDrawingImageIds(db, selectedState);
 

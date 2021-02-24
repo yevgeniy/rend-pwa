@@ -5,7 +5,7 @@ import {
   RemoteMongoClient,
   UserApiKeyCredential
 } from "mongodb-stitch-browser-sdk";
-import { getStates, getUsers } from "./services";
+import { getStates, getUsers, getCategories } from "./services";
 var Client = Stitch.initializeDefaultAppClient("rend-app-nczgz");
 const Mongodb = Client.getServiceClient(
   RemoteMongoClient.factory,
@@ -144,7 +144,8 @@ export function useSelectedState() {
   const setSelectedState = selectedState => {
     updateState({
       selectedState,
-      selectedUser: null
+      selectedUser: null,
+      selectedCategory: null
     });
   };
   return { selectedState, setSelectedState };
@@ -157,7 +158,8 @@ export function useSelectedUser() {
   const setSelectedUser = selectedUser => {
     updateState({
       selectedUser,
-      selectedState: null
+      selectedState: null,
+      selectedCategory: null
     });
   };
   return { selectedUser, setSelectedUser };
@@ -196,4 +198,35 @@ export function useMemoState(fn, args) {
 
   /*return state if state was set or memo is waiting on a promise*/
   return [ref.current || (r && r.then) ? val : r, setter];
+}
+
+export function useSelectedCategory() {
+  const [selectedCategory, updateState] = useStore(
+    ({ selectedCategory }) => selectedCategory
+  );
+
+  const setSelectedCategory = selectedCategory => {
+    updateState({
+      selectedCategory,
+      selectedState: null,
+      selectedUser: null
+    });
+  };
+  return { selectedCategory, setSelectedCategory };
+}
+export function useCategories() {
+  const db = useDb();
+  const [categories, updateState] = useStore(({ categories }) => {
+    return categories;
+  });
+  useEffect(() => {
+    if (!db) return;
+    if (categories) return;
+
+    getCategories(db)
+      .then(categories => updateState({ categories }))
+      .catch(e => console.log(e));
+  }, [db, categories]);
+
+  return categories;
 }

@@ -26,24 +26,36 @@ const SelectSrcView = React.memo(
     states,
     setSelectedState,
     selectedState,
-    selectedUser,
+
     users,
+    selectedUser,
     setSelectedUser,
+
+    categories,
+    selectedCategory,
+    setSelectedCategory,
     db
   }) => {
     const classes = useStyles();
-    const [src, setsrc] = useState(selectedState ? "states" : "users");
+    const { src, labels, doSelect, toggle, selected } = useSrc(
+      selectedState,
+      selectedUser,
+      selectedCategory,
+      users,
+      states,
+      categories,
+      setSelectedState,
+      setSelectedUser,
+      setSelectedCategory
+    );
 
     if (!states) return null;
 
     return (
       <div className={classes.root}>
         <List component="nav">
-          <ListItem
-            button
-            onClick={() => setsrc(src === "states" ? "users" : "states")}
-          >
-            <ListItemText primary={src === "states" ? "states" : "users"} />
+          <ListItem button onClick={toggle}>
+            <ListItemText primary={src} />
           </ListItem>
         </List>
         <Divider />
@@ -60,19 +72,18 @@ const SelectSrcView = React.memo(
         <Divider />
 
         <List component="nav">
-          {(src === "states" ? states : users).map(v => {
+          {labels.map(v => {
             return (
               <ListItem
                 key={v}
                 button
-                onClick={() =>
-                  src === "states" ? setSelectedState(v) : setSelectedUser(v)
-                }
+                onClick={() => {
+                  doSelect(v);
+                }}
               >
                 <ListItemText
                   className={clsx({
-                    [classes.selectedState]:
-                      (src === "states" ? selectedState : selectedUser) === v
+                    [classes.selectedState]: selected === v
                   })}
                   primary={v}
                 />
@@ -84,5 +95,55 @@ const SelectSrcView = React.memo(
     );
   }
 );
+
+function useSrc(
+  selectedState,
+  selectedUser,
+  selectedCategory,
+  users,
+  states,
+  categories,
+  setSelectedState,
+  setSelectedUser,
+  setSelectedCategory
+) {
+  const [data, setdata] = useState({
+    src: selectedState ? "states" : selectedUser ? "users" : "categories",
+    labels: selectedState ? states : selectedUser ? users : categories,
+    doSelect: selectedState
+      ? setSelectedState
+      : selectedUser
+      ? setSelectedUser
+      : setSelectedCategory,
+    selected: selectedState || selectedUser || selectedCategory
+  });
+
+  const toggle = () => {
+    const { src } = data;
+    if (src === "state")
+      setdata({
+        src: "users",
+        labels: users,
+        doSelect: setSelectedUser,
+        selected: selectedUser
+      });
+    else if (src === "users")
+      setdata({
+        src: "categories",
+        labels: categories,
+        doSelect: setSelectedCategory,
+        selected: selectedCategory
+      });
+    else if (src === "categories")
+      setdata({
+        src: "states",
+        labels: states,
+        doSelect: setSelectedState,
+        selected: selectedState
+      });
+  };
+
+  return { ...data, toggle };
+}
 
 export default SelectSrcView;

@@ -12,7 +12,10 @@ const StateSelectMenu = React.memo(
     setOpen,
     users,
     selectedUser,
-    setSelectedUser
+    setSelectedUser,
+    categories,
+    setSelectedCategory,
+    selectedCategory
   }) => {
     return (
       <Drawer open={open} onClose={() => setOpen(false)}>
@@ -25,6 +28,9 @@ const StateSelectMenu = React.memo(
             users={users}
             selectedUser={selectedUser}
             setSelectedUser={setSelectedUser}
+            categories={categories}
+            setSelectedCategory={setSelectedCategory}
+            selectedCategory={selectedCategory}
           />
         </React.Suspense>
       </Drawer>

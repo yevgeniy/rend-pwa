@@ -43,7 +43,11 @@ const ImgList = React.memo(
     setSelectedState,
     users,
     selectedUser,
-    setSelectedUser
+    setSelectedUser,
+
+    categories,
+    setSelectedCategory,
+    selectedCategory
   }) => {
     const classes = useStyles();
     const brokenLinksRef = useRef(new Set());
@@ -54,7 +58,7 @@ const ImgList = React.memo(
       totalPages,
       currentPage,
       setPage
-    } = useImagesSystem(db, selectedState);
+    } = useImagesSystem(db);
     const {
       selectedImage: selectedImageId,
       setSelectedImage
@@ -129,13 +133,16 @@ const ImgList = React.memo(
             setOpen,
             users,
             selectedUser,
-            setSelectedUser
+            setSelectedUser,
+            categories,
+            setSelectedCategory,
+            selectedCategory
           }}
         />
 
         <ControlMenu
           {...{
-            name: selectedState || selectedUser,
+            name: selectedState || selectedUser || selectedCategory,
             isFunctionsOpen,
             setIsFunctionOpen,
             setPage,

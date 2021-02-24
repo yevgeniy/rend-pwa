@@ -4,13 +4,15 @@ import { makeStyles } from "@material-ui/core";
 import {
   useStates,
   useUsers,
+  useCategories,
   useDb,
   useSelectedState,
-  useSelectedUser
+  useSelectedUser,
+  useSelectedCategory
 } from "./hooks";
 import ErrorBoundary from "./ErrorBoundery";
 import ImgList from "./ImgList";
-const SelectedSrcView = React.lazy(() => import("./SelectSrcView"));
+const SelectSrcView = React.lazy(() => import("./SelectSrcView"));
 
 const useStyles = makeStyles(theme => {
   return {
@@ -23,28 +25,36 @@ const App = React.memo(() => {
   const db = useDb();
   const states = useStates(null);
   const users = useUsers(null);
+  const categories = useCategories(null);
+
   const { selectedState, setSelectedState } = useSelectedState();
   const { selectedUser, setSelectedUser } = useSelectedUser();
+  const { selectedCategory, setSelectedCategory } = useSelectedCategory();
 
   if (!db) return null;
   if (!states) return <div>loading states</div>;
   if (!users) return <div>loading users</div>;
-
-  console.log("AAAAA", users);
+  if (!categories) return <div>loading categories</div>;
 
   return (
     <div className={classes.root}>
       <ErrorBoundary>
-        {!selectedState && !selectedUser ? (
+        {!selectedState && !selectedUser && !selectedCategory ? (
           <Suspense fallback={<div></div>}>
-            <SelectedSrcView
+            <SelectSrcView
               {...{
                 states,
                 setSelectedState,
                 selectedState,
+
                 users,
                 selectedUser,
                 setSelectedUser,
+
+                categories,
+                setSelectedCategory,
+                selectedCategory,
+
                 db
               }}
             />
@@ -54,11 +64,17 @@ const App = React.memo(() => {
             {...{
               setSelectedState,
               selectedState,
-              db,
               states,
+
+              db,
+
               users,
               selectedUser,
-              setSelectedUser
+              setSelectedUser,
+
+              categories,
+              setSelectedCategory,
+              selectedCategory
             }}
           />
         )}

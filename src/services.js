@@ -20,8 +20,6 @@ export async function removeDuplicates(images, db) {
   const proms = rem.map(v => {
     const i = images.findIndex(i => i === v);
     images.splice(i, 1);
-    console.log("DELETING", v);
-    //return new Promise(res => setTimeout(res, 1000));
     return db.collection("images").deleteOne({ _id: v._id });
   });
   await Promise.all(proms);
@@ -68,13 +66,27 @@ export async function getUsers(db) {
   return res.sort((a, b) => (a >= b ? 1 : -1));
 }
 
-export async function getStateImages(db, state) {
-  let images = await db
+export async function getCategories(db) {
+  const res = await db
     .collection("images")
-    .find({ datetime: state })
+    .aggregate([
+      { $group: { _id: null, uniqueValues: { $addToSet: "$keywords" } } }
+    ])
     .toArray();
-  return images;
+
+  const keywords = Array.from(
+    new Set(res[0].uniqueValues.reduce((c, v) => [...c, ...v], []))
+  );
+
+  return (keywords || []).filter(v => !!v);
 }
+export function getCategoryImages(db, category) {
+  return db
+    .collection("images")
+    .aggregate([{ $match: { keywords: category } }])
+    .toArray();
+}
+
 export async function getStateImageIds(db, state) {
   const imageIds = await db
     .collection("images")
@@ -90,6 +102,15 @@ export async function getUserImageIds(db, user) {
     .aggregate([{ $match: { username: user } }, { $group: { _id: "$id" } }])
     .toArray()
     .then(res => res.map(v => v._id));
+  return imageIds;
+}
+export async function getCategoryImageIds(db, category) {
+  const imageIds = await db
+    .collection("images")
+    .aggregate([{ $match: { keywords: category } }, { $group: { _id: "$id" } }])
+    .toArray()
+    .then(res => res.map(v => v._id));
+
   return imageIds;
 }
 
@@ -123,7 +144,6 @@ export async function getMarkedImageIds(db) {
   return imageIds;
 }
 export async function getImagesByIds(db, imageIds) {
-  console.log("getting images", imageIds);
   const images = await db
     .collection("images")
     .find({ id: { $in: imageIds } })
