@@ -228,5 +228,10 @@ export function useCategories() {
       .catch(e => console.log(e));
   }, [db, categories]);
 
-  return categories;
+  const update = v => {
+    const allkeywords = Array.from(new Set([...categories, ...v]));
+    updateState({ categories: allkeywords });
+  };
+
+  return [categories, update];
 }

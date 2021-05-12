@@ -25,7 +25,7 @@ const App = React.memo(() => {
   const db = useDb();
   const states = useStates(null);
   const users = useUsers(null);
-  const categories = useCategories(null);
+  const [categories] = useCategories();
 
   const { selectedState, setSelectedState } = useSelectedState();
   const { selectedUser, setSelectedUser } = useSelectedUser();

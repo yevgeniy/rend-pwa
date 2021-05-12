@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useUpdate } from "./hooks";
-import { makeStyles } from "@material-ui/core";
+import { useUpdate, useCategories } from "./hooks";
+import { makeStyles, Divider } from "@material-ui/core";
 import Drawer from "@material-ui/core/Drawer";
 import IconButton from "@material-ui/core/IconButton";
 import List from "@material-ui/core/List";
@@ -13,64 +13,76 @@ import Flag from "@material-ui/icons/Flag";
 import MenuIcon from "@material-ui/icons/Menu";
 import BackIcon from "@material-ui/icons/Reply";
 import panzoom from "panzoom";
+import AutoComplete from "./AutoComplete";
 
-const useStyles = makeStyles(theme => {
-  return {
-    container: {
-      top: 0,
-      left: 0,
-      position: "fixed",
-      height: "100vh",
-      width: "100%",
-      background: theme.palette.background.default
-    },
-    imgContainer: {
-      position: "relative",
-      height: "100vh",
-      width: "100%"
-    },
-    img: {
-      maxWidth: "98%",
-      maxHeight: "98%",
-      position: "absolute",
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      margin: "auto",
-      transition: "ease all 300ms"
-    },
-    backButton: {
-      position: "fixed",
-      zIndex: 9999999,
-      left: 5,
-      top: 5,
-      background: theme.palette.secondary.dark,
-      opacity: 0.8,
-      color: theme.palette.secondary.contrastText,
-      transition: "ease all 300ms",
-      "&:hover": {
-        background: theme.palette.secondary.light
+const useStyles = makeStyles(
+  theme => {
+    return {
+      container: {
+        top: 0,
+        left: 0,
+        position: "fixed",
+        height: "100vh",
+        width: "100%",
+        background: theme.palette.background.default
+      },
+
+      imgContainer: {
+        position: "relative",
+        height: "100vh",
+        width: "100%"
+      },
+      img: {
+        maxWidth: "98%",
+        maxHeight: "98%",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        margin: "auto",
+        transition: "ease all 300ms"
+      },
+      backButton: {
+        position: "fixed",
+        zIndex: 9999999,
+        left: 5,
+        top: 5,
+        background: theme.palette.secondary.dark,
+        opacity: 0.8,
+        color: theme.palette.secondary.contrastText,
+        transition: "ease all 300ms",
+        "&:hover": {
+          background: theme.palette.secondary.light
+        }
+      },
+      menuButton: {
+        position: "fixed",
+        zIndex: 9999999,
+        right: 5,
+        top: 5,
+        background: theme.palette.primary.dark,
+        opacity: 0.8,
+        color: theme.palette.primary.contrastText,
+        transition: "ease all 300ms",
+        "&:hover": {
+          background: theme.palette.primary.light
+        }
       }
-    },
-    menuButton: {
-      position: "fixed",
-      zIndex: 9999999,
-      right: 5,
-      top: 5,
-      background: theme.palette.primary.dark,
-      opacity: 0.8,
-      color: theme.palette.primary.contrastText,
-      transition: "ease all 300ms",
-      "&:hover": {
-        background: theme.palette.primary.light
-      }
-    }
-  };
-});
+    };
+  },
+  { name: "imgview" }
+);
+
+const useDrawerStyles = makeStyles(() => ({
+  paperAnchorRight: {
+    width: 200
+  }
+}));
 
 const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
   const classes = useStyles();
+  const drawerClasses = useDrawerStyles();
   const imgRef = useRef();
   const [zoom, setZoom] = useState(1);
   const [open, setOpen] = useState(false);
@@ -151,7 +163,12 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
       >
         <BackIcon />
       </IconButton>
-      <Drawer anchor="right" open={open} onClose={() => setOpen(false)}>
+      <Drawer
+        classes={drawerClasses}
+        anchor="right"
+        open={open}
+        onClose={() => setOpen(false)}
+      >
         <List component="nav">
           <ListItem button onClick={() => setMarked(!marked)}>
             <ListItemIcon>
@@ -172,10 +189,33 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
             <ListItemText primary="Drawing" />
           </ListItem>
         </List>
+
+        <Divider />
+
+        <AutoCompleteSection img={img} updateImage={updateImage} />
       </Drawer>
     </div>
   );
 });
+
+function AutoCompleteSection({ img, updateImage }) {
+  const keywords = ["foo"];
+  const [allKeyWords, updateAllKeyWords] = useCategories();
+  const doUpdate = v => {
+    updateAllKeyWords(v);
+    updateImage(img.id, { keywords: v });
+  };
+  return (
+    <div>
+      <Divider />
+      <AutoComplete
+        keywords={img.keywords || []}
+        allKeywords={allKeyWords || []}
+        onUpdate={doUpdate}
+      />
+    </div>
+  );
+}
 
 function useMarked(img, updateImage) {
   const [marked, setMarked] = useState(img.marked);
