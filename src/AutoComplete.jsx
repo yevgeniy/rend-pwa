@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { Chip, TextField, makeStyles } from "@material-ui/core";
 
 import Autocomplete from "@material-ui/lab/Autocomplete";

@@ -199,7 +199,6 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
 });
 
 function AutoCompleteSection({ img, updateImage }) {
-  const keywords = ["foo"];
   const [allKeyWords, updateAllKeyWords] = useCategories();
   const doUpdate = v => {
     updateAllKeyWords(v);
