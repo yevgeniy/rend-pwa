@@ -123,6 +123,7 @@ function useImages(imageIds, db, selectedState) {
   useEffect(() => {
     if (!imageIds) return;
 
+    console.log("a", imageIds);
     getImagesByIds(db, imageIds)
       .then(async res => {
         res = await removeDuplicates(res, db);

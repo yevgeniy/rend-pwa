@@ -31,7 +31,7 @@ const App = React.memo(() => {
   const { selectedUser, setSelectedUser } = useSelectedUser();
   const { selectedCategory, setSelectedCategory } = useSelectedCategory();
 
-  if (!db) return null;
+  if (!db) return <div>connecting</div>;
   if (!states) return <div>loading states</div>;
   if (!users) return <div>loading users</div>;
   if (!categories) return <div>loading categories</div>;

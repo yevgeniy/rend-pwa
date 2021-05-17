@@ -163,6 +163,7 @@ const ImgView = React.memo(({ img, updateImage, setSelectedImage }) => {
       >
         <BackIcon />
       </IconButton>
+
       <Drawer
         classes={drawerClasses}
         anchor="right"

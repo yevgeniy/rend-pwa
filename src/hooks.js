@@ -25,7 +25,7 @@ const Store = {
       this.runOnUpdates = this.runOnUpdates.filter(v => v !== fn);
     };
   },
-  state: null,
+  state: {},
   init: async function() {
     const data = await localforage.getItem("state-db");
     this.state = data || {};
@@ -90,17 +90,21 @@ export function useStore(extractor) {
   return [val, updateState, clear];
 }
 
+export function login() {
+  console.log("CONNECTING");
+  Client.auth.loginWithCredential(credential).then(user => {
+    Store.state.db = Mongodb.db("rend");
+    Store.broadcast();
+  });
+}
+export function logout() {
+  console.log("DISCONNECTING");
+  Store.state.db = null;
+  Client.auth.logout();
+  Store.broadcast();
+}
 export function useDb() {
-  const [db, setDb] = useState(null);
-
-  useEffect(() => {
-    Client.auth.loginWithCredential(credential).then(user => {
-      setDb(Mongodb.db("rend"));
-    });
-    return () => {
-      Client.auth.logout();
-    };
-  }, []);
+  const [db] = useStore(v => v.db);
 
   return db;
 }

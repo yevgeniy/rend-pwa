@@ -1,13 +1,17 @@
-import React from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import App from "./App";
+import { login, logout } from "./hooks";
 import * as serviceWorker from "./serviceWorker";
 import "./install";
 
 const HttpsApp = () => {
-  return (
-    <App />
-  )
+  useEffect(() => {
+    login();
+    return () => logout();
+  }, []);
+
+  return <App />;
 };
 
 const rootElement = document.getElementById("root");
