@@ -25,15 +25,18 @@ const Store = {
       this.runOnUpdates = this.runOnUpdates.filter(v => v !== fn);
     };
   },
-  state: {},
-  init: async function() {
-    const data = await localforage.getItem("state-db");
-    this.state = data || {};
-    this.broadcast();
+  state: null,
+  data: null,
+  init: function() {
+    process$ = process$.then(async () => {
+      const data = await localforage.getItem("state-db");
+      this.state = data || {};
+      this.broadcast();
+    });
   },
   broadcast: function() {
     this.runOnUpdates.forEach(v => {
-      v(this.state);
+      v({ ...this.state, ...this.data });
     });
   },
   clear: function() {
@@ -47,6 +50,10 @@ const Store = {
           res(this.state);
         })
     );
+  },
+  updateData: function(st) {
+    this.data = { ...this.data, ...st };
+    this.broadcast();
   },
   updateState: function(st) {
     process$ = process$.then(
@@ -72,7 +79,9 @@ const Store = {
 Store.init();
 
 export function useStore(extractor) {
-  const [val, setVal] = useState(Store.state ? extractor(Store.state) : null);
+  const [val, setVal] = useState(
+    Store.state ? extractor({ ...Store.state, ...Store.data }) : null
+  );
 
   useEffect(() => {
     return Store.subscribe(s => {
@@ -93,15 +102,13 @@ export function useStore(extractor) {
 export function login() {
   console.log("CONNECTING");
   Client.auth.loginWithCredential(credential).then(user => {
-    Store.state.db = Mongodb.db("rend");
-    Store.broadcast();
+    Store.updateData({ db: Mongodb.db("rend") });
   });
 }
 export function logout() {
   console.log("DISCONNECTING");
-  Store.state.db = null;
+  Store.updateData({ db: null });
   Client.auth.logout();
-  Store.broadcast();
 }
 export function useDb() {
   const [db] = useStore(v => v.db);
