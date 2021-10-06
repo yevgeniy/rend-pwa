@@ -1,9 +1,14 @@
-export function shuffle(a, rand) {
+export function shuffle(a) {
+  const rand = new Array(a.length)
+    .fill(0, 0, a.length)
+    .map(() => Math.random());
+
   for (let i = a.length - 1; i > 0; i--) {
-    let r = rand[i % rand.length];
+    let r = rand[i];
     const j = Math.floor(r * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
   }
+  console.log(a);
   return a;
 }
 export async function removeDuplicates(images, db) {

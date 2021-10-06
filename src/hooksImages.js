@@ -48,23 +48,15 @@ function useImageIds(db, selectedState, selectedUser, selectedCategory) {
 }
 
 function useShuffledImageIds(imageIds, selectedState) {
-  const [rand, updateState] = useStore(s => s.rand);
-
   const imgs = useMemo(() => {
-    const res = rand && imageIds ? shuffle([...imageIds], rand) : imageIds;
+    const res =
+      imageIds && selectedState === "__MARKED__"
+        ? shuffle([...imageIds])
+        : imageIds;
     return res;
-  }, [rand, imageIds]);
+  }, [selectedState, imageIds]);
+  console.log("a", imgs);
 
-  useUpdate(() => {
-    if (selectedState === "__MARKED__") {
-      updateState({
-        rand: new Array(10).fill(0, 0, 10).map(v => Math.random())
-      });
-    } else
-      updateState({
-        rand: null
-      });
-  }, [selectedState]);
   return imgs;
 }
 function usePages(imageIds, selectedState) {
